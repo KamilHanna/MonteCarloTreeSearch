@@ -57,7 +57,7 @@ Real Portfolio<T>::computeExpectedReturn() const {
     return expectedReturn;
 }
 
-// Computes and returns risk of the portfolio
+// Computes and returns risk (Variance) of the portfolio
 template <typename T> 
 Real Portfolio<T>::computeRisk() const{
     Real risk = 0;
@@ -70,7 +70,7 @@ Real Portfolio<T>::computeRisk() const{
             }
         }
     }
-    return sqrt(risk);
+    return risk;
 }
 
 // Computes and returns volatility of the portfolio
