@@ -4,7 +4,7 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
-#include <Types.hpp>
+#include <Utils.hpp>
 
 using namespace std;
 
@@ -16,6 +16,7 @@ private:
     Real currentPrice;                           // Current price of the asset
     Real expectedReturn;                         // Expected return of the asset
     Real risk;                                   // Standard deviation of returns [Risk]
+    vector<Real> correlations;                   // Correlations with other assets
     inline static int numberOfAssets = 0;        // Number of nodes created
 
 public:
@@ -30,6 +31,7 @@ public:
     Real getcurrentPrice() const;
     Real getexpectedReturn() const;
     Real getRisk() const;
+    Real getCorrelation(size_t index) const;
     static int getNumberOfAssets();
 
    // Setters
@@ -38,6 +40,8 @@ public:
     void setcurrentPrice(Real currentPrice);
     void setExpectedReturn(Real expectedReturn);
     void setRisk(Real risk);
+    void setCorrelations(const vector<Real>& correlations);
+
 
 
     // Member functions

@@ -36,6 +36,13 @@ Real Asset::getRisk() const {
     return risk;
 }
 
+Real Asset::getCorrelation(size_t index) const {
+    if (index >= correlations.size()) {
+        throw out_of_range("Index out of range");
+    }
+    return correlations[index];
+}
+
 int Asset::getNumberOfAssets() {
     return numberOfAssets;
 }
@@ -60,6 +67,10 @@ void Asset::setExpectedReturn(Real expectedReturn) {
 
 void Asset::setRisk(Real risk) {
     this->risk = risk;
+}
+
+void Asset::setCorrelations(const vector<Real>& correlations) {
+    this->correlations = correlations;
 }
 
 // Member functions

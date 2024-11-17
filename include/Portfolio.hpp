@@ -6,7 +6,7 @@
 #include <fstream>
 #include <vector>
 #include <cmath>
-#include "Types.hpp"
+#include "Utils.hpp"
 #include "Asset.hpp"
 
 using namespace std;
@@ -35,8 +35,8 @@ public :
     Real computePortfolioValue() const;
     Real computeExpectedReturn() const;
     Real computeRisk()  const;
+    Real computeVolatility() const;
     Real computeSharpeRatio()  const;
-    Real computeVaR() const;
 
     /*
     Functionalities to print info about a portfolio (even more stuff like VaR...)

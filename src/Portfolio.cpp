@@ -62,18 +62,27 @@ template <typename T>
 Real Portfolio<T>::computeRisk() const{
     Real risk = 0;
     for (int i = 0; i < assets.size(); i++) {
-        risk += pow(assets[i].getRisk(), 2) * pow(weights[i], 2);
+        for (int j = 0; j < assets.size(); j++) {
+            if(i == j) {
+            risk += weights[i] * weights[j] * assets[i].getRisk() * assets[j].getRisk();
+            } else {
+            risk += weights[i] * weights[j] * assets[i].getRisk() * assets[j].getRisk() * assets[i].getCorrelation(j);
+            }
+        }
     }
     return sqrt(risk);
+}
+
+// Computes and returns volatility of the portfolio
+template <typename T>
+Real Portfolio<T>::computeVolatility() const {
+    return sqrt(computeRisk());
 }
 
 // Computes and returns Sharpe ratio of the portfolio
 template <typename T>
 Real Portfolio<T>::computeSharpeRatio() const{
-    return (computeExpectedReturn() - 0.02) / computeRisk(); // 0.02 is the risk free rate
+    return (computeExpectedReturn() - RiskFreeRate) / computeVolatility(); // 0.02 is the risk free rate
 }
 
-template <typename T>
-Real Portfolio<T>::computeVaR() const{
 
-}
