@@ -6,9 +6,10 @@
 #include <fstream>
 #include <vector>
 #include <cmath>
-#include "Utils.hpp"
+#include "Constants.hpp"
+#include "Types.hpp"
 #include "Asset.hpp"
-
+#include "Constraints.hpp"
 using namespace std;
 
 template <typename T>
@@ -20,16 +21,16 @@ private:
 
 public :
     //Constructor
-    Portfolio(vector<Asset> assets, vector<T> weights);
+    Portfolio(vector<Asset>& assets, vector<T>& weights);
 
     //Getters
     vector<Asset> getAssets() const;
     vector<T> getWeights() const;
 
     //Setters
-    void setAssets(vector<Asset> assets);
-    void setWeights(vector<T> weights);
-    void addAsset(Asset asset, T weight);
+    void setAssets(vector<Asset>& assets);
+    void setWeights(vector<T>& weights);
+    void addAsset(Asset& asset, T& weight);
   
     //Member functions
     Real computePortfolioValue() const;

@@ -1,10 +1,12 @@
 #include <iostream>
+#include <fstream>
+#include <cmath>
 #include <vector>
 
 #include "Node.hpp"
 #include "Portfolio.hpp"   
 
-
+/*
 Real testSolver(Real deltaT, index_t dim) {
     // define T & deltaT  & Re
     const Real T = 0.1;
@@ -215,10 +217,14 @@ Real testSolver(Real deltaT, index_t dim) {
     logger.empty();
     return l2Norm;
 }
-
+*/
 
 int main(int argc, char *argv[]) {
 
+
+
+
+/*
     // dividing the timestep size to half
     std::vector<Real> deltaTs = {0.001, 0.0005, 0.00025};
     std::vector<index_t> dims = {4, 8, 16, 32, 64};
@@ -250,7 +256,7 @@ int main(int argc, char *argv[]) {
     std::ofstream csvFile("output.csv");
     csvFile << "step,error" << std::endl;
     for (int i = 0; i < dims.size(); ++i) csvFile << dims[i] << "," << error[i] << std::endl;
-
+*/
 
     return 0;
 }

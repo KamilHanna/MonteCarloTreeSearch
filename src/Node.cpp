@@ -2,7 +2,7 @@
 
 //Constructor
 template <typename state>
-Node<state>::Node(int id){
+Node<state>::Node(int& id){
     setID(id);
     numberOfNodes++;
 }
@@ -54,19 +54,19 @@ int Node<state>::getNumberOfNodes() {
 
 // Setter for ID
 template<typename state>
-void Node<state>::setId(int id) {
+void Node<state>::setId(int& id) {
     this->id = id;
 }
 
 // Setter for visits
 template<typename state>
-void Node<state>::setVisits(int visits) {
+void Node<state>::setVisits(int& visits) {
     this->visits = visits;
 }
 
 // Setter for total reward
 template<typename state>
-void Node<state>::setTotalReward(Real totalReward) { 
+void Node<state>::setTotalReward(Real& totalReward) { 
     this->totalReward = totalReward;
  }
 
@@ -84,7 +84,7 @@ void Node<state>::setChildren(vector<shared_ptr<Node<state>>> children) {
 
 // Setter for untried actions
 template<typename state> 
-void Node<state>::setUntriedActions(vector<int> untried_actions) {
+void Node<state>::setUntriedActions(vector<int>& untried_actions) {
     this->untried_actions = untried_actions;
 }
 

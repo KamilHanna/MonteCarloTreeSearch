@@ -2,7 +2,7 @@
 
 
 //Constructor 
-Asset::Asset(const string& name, Real currentPrice, Real expectedReturn, Real risk, const string& assetClass) {
+Asset::Asset(const string& name, Real& currentPrice, Real& expectedReturn, Real& risk, const string& assetClass) {
     setName(name);
     setcurrentPrice(currentPrice);
     setExpectedReturn(expectedReturn);
@@ -36,7 +36,7 @@ Real Asset::getRisk() const {
     return risk;
 }
 
-Real Asset::getCorrelation(size_t index) const {
+Real Asset::getCorrelation(size_t& index) const {
     if (index >= correlations.size()) {
         throw out_of_range("Index out of range");
     }
@@ -57,15 +57,15 @@ void Asset::setAssetClass(const string& assetClass) {
     this->assetClass = assetClass;
 }
 
-void Asset::setcurrentPrice(Real currentPrice) {
+void Asset::setcurrentPrice(Real& currentPrice) {
     this->currentPrice = currentPrice;
 }
 
-void Asset::setExpectedReturn(Real expectedReturn) {
+void Asset::setExpectedReturn(Real& expectedReturn) {
     this->expectedReturn = expectedReturn;
 }
 
-void Asset::setRisk(Real risk) {
+void Asset::setRisk(Real& risk) {
     this->risk = risk;
 }
 

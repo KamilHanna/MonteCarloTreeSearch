@@ -2,7 +2,7 @@
 
 //Constructor
 template <typename T>
-Portfolio<T>::Portfolio(vector<Asset> assets, vector<T> weights) {
+Portfolio<T>::Portfolio(vector<Asset>& assets, vector<T>& weights) {
     setAssets(assets);
     setWeights(weights);
 }
@@ -20,17 +20,17 @@ vector<T> Portfolio<T>::getWeights() const{
 
 //Setters
 template <typename T>
-void Portfolio<T>::setAssets(vector<Asset> assets) {
+void Portfolio<T>::setAssets(vector<Asset>& assets) {
     this->assets = assets;
 }
 
 template <typename T>
-void Portfolio<T>::setWeights(vector<T> weights) {
+void Portfolio<T>::setWeights(vector<T>& weights) {
     this->weights = weights;
 }
 
 template <typename T>
-void Portfolio<T>::addAsset(Asset asset, T weight) {
+void Portfolio<T>::addAsset(Asset& asset, T& weight) {
     assets.push_back(asset);
     weights.push_back(weight);
 }    
@@ -82,7 +82,7 @@ Real Portfolio<T>::computeVolatility() const {
 // Computes and returns Sharpe ratio of the portfolio
 template <typename T>
 Real Portfolio<T>::computeSharpeRatio() const{
-    return (computeExpectedReturn() - RiskFreeRate) / computeVolatility(); // 0.02 is the risk free rate
+    return (computeExpectedReturn() - Constants::RiskFreeRate) / computeVolatility(); // 0.02 is the risk free rate
 }
 
 

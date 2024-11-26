@@ -4,7 +4,7 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
-#include <Utils.hpp>
+#include <Types.hpp>
 
 using namespace std;
 
@@ -21,7 +21,7 @@ private:
 
 public:
     // Constructor
-    Asset(const string& name, Real currentPrice, Real expectedReturn, Real risk, const string& assetClass);
+    Asset(const string& name, Real& currentPrice, Real& expectedReturn, Real& risk, const string& assetClass);
     //Destructor
     ~Asset();
 
@@ -31,15 +31,15 @@ public:
     Real getcurrentPrice() const;
     Real getexpectedReturn() const;
     Real getRisk() const;
-    Real getCorrelation(size_t index) const;
+    Real getCorrelation(size_t& index) const;
     static int getNumberOfAssets();
 
    // Setters
     void setName(const string& name);
     void setAssetClass(const string& category);
-    void setcurrentPrice(Real currentPrice);
-    void setExpectedReturn(Real expectedReturn);
-    void setRisk(Real risk);
+    void setcurrentPrice(Real& currentPrice);
+    void setExpectedReturn(Real& expectedReturn);
+    void setRisk(Real& risk);
     void setCorrelations(const vector<Real>& correlations);
 
 

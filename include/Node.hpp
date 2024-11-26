@@ -5,7 +5,7 @@
 #include <vector>
 #include <cmath>
 #include <memory>
-#include "Utils.hpp"
+#include "Types.hpp"
 
 using namespace std;
 
@@ -34,7 +34,7 @@ private:
 
 public :
     //Constructor
-    Node(int id);
+    Node(int& id);
     //Destructor
     ~Node();
 
@@ -48,12 +48,12 @@ public :
     static int getNumberOfNodes();
 
     //Setters
-    void setId(int id);
-    void setVisits(int visits);
-    void setTotalReward(Real totalReward);
+    void setId(int& id);
+    void setVisits(int& visits);
+    void setTotalReward(Real& totalReward);
     void setParent(weak_ptr<Node<state>> parent);
     void setChildren(vector<shared_ptr<Node<state>>> children);
-    void setUntriedActions(vector<int> untried_actions);
+    void setUntriedActions(vector<int>& untried_actions);
 
     //Member functions
     void NodeInformation() const;
