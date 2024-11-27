@@ -3,7 +3,7 @@
 //Constructor
 template <typename state>
 Node<state>::Node(int& id){
-    setID(id);
+    setId(id);
     numberOfNodes++;
 }
 

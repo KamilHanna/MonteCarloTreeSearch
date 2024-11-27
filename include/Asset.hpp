@@ -31,7 +31,7 @@ public:
     Real getcurrentPrice() const;
     Real getexpectedReturn() const;
     Real getRisk() const;
-    Real getCorrelation(size_t& index) const;
+    Real getCorrelation(int& index) const;
     static int getNumberOfAssets();
 
    // Setters

@@ -42,7 +42,7 @@ public :
     int getId() const;
     int getVisits() const;
     Real getTotalReward() const;
-    shared_ptr<Node<state>> Node<state>::getParent() const;
+    shared_ptr<Node<state>> getParent() const;
     vector<shared_ptr<Node<state>>> getChildren() const;
     vector<int> getUntriedActions() const;
     static int getNumberOfNodes();

@@ -2,10 +2,13 @@
 #include <fstream>
 #include <cmath>
 #include <vector>
+#include <chrono>
 
+#include "Asset.hpp"
 #include "Node.hpp"
 #include "Portfolio.hpp"   
 
+using namespace std;
 /*
 Real testSolver(Real deltaT, index_t dim) {
     // define T & deltaT  & Re
@@ -221,9 +224,17 @@ Real testSolver(Real deltaT, index_t dim) {
 
 int main(int argc, char *argv[]) {
 
-
-
-
+    string assetName = "Stock ABC";
+    Real currentPrice = 150.75;
+    Real expectedReturn = 0.08; // 8% return
+    Real risk = 0.15;           // 15% risk
+    string assetClass = "Equity";
+    string assetName2 = "Stock XYZ";
+    // Create an Asset object using the constructor
+    Asset myAsset(assetName, currentPrice, expectedReturn, risk, assetClass);
+    Asset myAsset2(assetName2, currentPrice, expectedReturn, expectedReturn, assetName2);
+    myAsset.AssetInformation();
+    myAsset2.AssetInformation();
 /*
     // dividing the timestep size to half
     std::vector<Real> deltaTs = {0.001, 0.0005, 0.00025};

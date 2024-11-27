@@ -36,7 +36,7 @@ Real Asset::getRisk() const {
     return risk;
 }
 
-Real Asset::getCorrelation(size_t& index) const {
+Real Asset::getCorrelation(int& index) const {
     if (index >= correlations.size()) {
         throw out_of_range("Index out of range");
     }
