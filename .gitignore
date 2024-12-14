@@ -1,0 +1,26 @@
+# Ignore the .gitignore file
+.gitignore
+
+# Build directory
+build/
+
+# VSCode settings
+.vscode/
+
+# Executables
+*.exe
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+.env/
+
+# Pytest cache
+.pytest_cache/
+
+# Logs and debug files
+*.log
+*.stackdump
