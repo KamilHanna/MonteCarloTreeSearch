@@ -6,6 +6,7 @@
 #include <cmath>
 #include <memory>
 #include "Types.hpp"
+#include "Portfolio.hpp"
 
 using namespace std;
 
@@ -44,11 +45,10 @@ public :
     Real getTotalReward() const;
     shared_ptr<Node<state>> getParent() const;
     vector<shared_ptr<Node<state>>> getChildren() const;
-    vector<int> getUntriedActions() const;
+    //vector<int> getUntriedActions() const;
     static int getNumberOfNodes();
 
     //Setters
-    void setId(int& id);
     void setVisits(int& visits);
     void setTotalReward(Real& totalReward);
     void setParent(weak_ptr<Node<state>> parent);

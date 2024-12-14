@@ -42,20 +42,10 @@ public:
     void setRisk(Real& risk);
     void setCorrelations(const vector<Real>& correlations);
 
-
-
     // Member functions
     void AssetInformation() const;
-    /*
-    void setCovariance(const std::string& otherAsset, double cov) { covarianceWithOtherAssets[otherAsset] = cov; }
-    void setHistoricalReturns(const std::vector<double>& returns) { historicalReturns = returns; }
-    void setDividendYield(double yield) { dividendYield = yield; }
-    void setTransactionCost(double cost) { transactionCost = cost; }
 
-        
-    double getDividendYield() const { return dividendYield; }
-    double getTransactionCost() const { return transactionCost; }
-*/
+
 };
 
 #endif // ASSET_HPP

@@ -85,4 +85,23 @@ Real Portfolio<T>::computeSharpeRatio() const{
     return (computeExpectedReturn() - Constants::RiskFreeRate) / computeVolatility(); // 0.02 is the risk free rate
 }
 
+template <typename T>
+void Portfolio<T>::PortfolioInformation() const {
+    cout << "$$Portfolio Information$$" << endl;
+    cout << "*************************" << endl;
+    cout << "Expected Return: " << computeExpectedReturn() << endl;
+    cout << "Risk: " << computeRisk() << endl;
+    cout << "Sharpe Ratio: " << computeSharpeRatio() << endl;
+    cout << "Portfolio Value: " << computePortfolioValue() << " $" << endl;
+    cout << "Portfolio Volatility: " << computeVolatility() << endl;
+    cout << "*************************" << endl;
+    
+    for (int i = 0; i < assets.size(); i++) {
+        assets[i].AssetInformation();
+        cout << "Asset Weight: " << weights[i] << endl;
+        cout << "*************************" << endl;
+    }
+}
+
+template class Portfolio<Real>;
 

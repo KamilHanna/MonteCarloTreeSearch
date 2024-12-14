@@ -1,21 +1,21 @@
-from NodeGenerationLib import *
 import os
 import sys
-    
-# Number of nodes to generate, passed as a command-line argument (Called from c++)
-num_nodes =int(sys.argv[1])
-
-grid_size = 10*num_nodes
-    
-nodes = generate_nodes(num_nodes, grid_size)
-    
-save_nodes_to_file(nodes, 'nodes.json')
-
-#Plotting the nodes without a connection.
-plot_nodes_unconnected(nodes, 'nodes_unconnected.png')
-
-#Plotting the nodes with a connection.
-plot_nodes(nodes, 'nodes_connected.png')
+import pandas as pd
+from FinanceLib import *
 
 
 
+# Reading the csv file
+df = pd.read_csv('Input.csv')
+get_expected_returns_and_risk(df,'1y')
+df.to_csv('Stocks.csv', index=False)
+
+#threshold = 1e-7
+#df.loc[df['Exp Return'] < threshold, 'Exp Return'] = 0  
+
+
+'''
+df = pd.read_csv('Stocks.csv')
+get_current_price(df)
+df.to_csv('Stocks.csv', index=False)
+'''

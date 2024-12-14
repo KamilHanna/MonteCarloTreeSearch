@@ -2,8 +2,7 @@
 
 //Constructor
 template <typename state>
-Node<state>::Node(int& id){
-    setId(id);
+Node<state>::Node(int& id) :id(id){
     numberOfNodes++;
 }
 
@@ -52,12 +51,6 @@ int Node<state>::getNumberOfNodes() {
 
 //Setters
 
-// Setter for ID
-template<typename state>
-void Node<state>::setId(int& id) {
-    this->id = id;
-}
-
 // Setter for visits
 template<typename state>
 void Node<state>::setVisits(int& visits) {
@@ -103,5 +96,7 @@ void Node<state>::NodeInformation() const {
     }
 
     cout << "Number of children: " << getChildren().size() << endl;
-    cout << "Number of untried actions: " << getUntriedActions().size() << endl;
+    //cout << "Number of untried actions: " << getUntriedActions().size() << endl;
 }
+
+template class Node<Portfolio<Real>>;

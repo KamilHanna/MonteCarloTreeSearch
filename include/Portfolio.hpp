@@ -38,21 +38,10 @@ public :
     Real computeRisk()  const;
     Real computeVolatility() const;
     Real computeSharpeRatio()  const;
-
+    void PortfolioInformation() const;
     /*
-    Functionalities to print info about a portfolio (even more stuff like VaR...)
-    Also print all assets with weights & prices?
-    void PortfolioInformation() const {
-        cout << "Portfolio Information" << endl;
-        cout << "---------------------" << endl;
-        cout << "Expected Return: " << computeExpectedReturn() << endl;
-        cout << "Risk: " << computeRisk() << endl;
-        cout << "Sharpe Ratio: " << computeSharpeRatio() << endl;
-        cout << "Portfolio Value: " << computePortfolioValue() << endl;
-    }
-    
+    Functionalities to print info about a portfolio (even more stuff like VaR...)    
     */
 };
 
 #endif //PORTFOLIO_HPP
-
