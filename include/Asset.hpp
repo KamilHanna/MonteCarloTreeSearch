@@ -21,31 +21,37 @@ private:
 
 public:
     // Constructor
-    Asset(const string& name, Real& currentPrice, Real& expectedReturn, Real& risk, const string& assetClass);
+    Asset(const string& name, 
+        const Real& currentPrice, 
+        const Real& expectedReturn, 
+        const Real& risk, 
+        const string& assetClass,
+        vector<Real>&& correlations);
+
     //Destructor
     ~Asset();
 
     // Getters
     string getName() const ;
     string getAssetClass() const;
-    Real getcurrentPrice() const;
-    Real getexpectedReturn() const;
+    Real getCurrentPrice() const;
+    Real getExpectedReturn() const;
     Real getRisk() const;
-    Real getCorrelation(int& index) const;
+    const vector<Real>& getCorrelations() const;
     static int getNumberOfAssets();
 
    // Setters
     void setName(const string& name);
     void setAssetClass(const string& category);
-    void setcurrentPrice(Real& currentPrice);
-    void setExpectedReturn(Real& expectedReturn);
-    void setRisk(Real& risk);
-    void setCorrelations(const vector<Real>& correlations);
+    void setCurrentPrice(const Real& currentPrice);
+    void setExpectedReturn(const Real& expectedReturn);
+    void setRisk(const Real& risk);
+    void setCorrelations(const vector<Real>&& correlations);
 
     // Member functions
+    Real getCorrelation(const int& index) const;
     void AssetInformation() const;
-
-
+    
 };
 
 #endif // ASSET_HPP

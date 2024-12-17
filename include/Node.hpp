@@ -49,11 +49,11 @@ public :
     static int getNumberOfNodes();
 
     //Setters
-    void setVisits(int& visits);
-    void setTotalReward(Real& totalReward);
-    void setParent(weak_ptr<Node<state>> parent);
-    void setChildren(vector<shared_ptr<Node<state>>> children);
-    void setUntriedActions(vector<int>& untried_actions);
+    void setVisits(const int& visits);
+    void setTotalReward(const Real& totalReward);
+    void setParent(const weak_ptr<Node<state>> parent);
+    void setChildren(const vector<shared_ptr<Node<state>>> children);
+    void setUntriedActions(const vector<int>& untried_actions);
 
     //Member functions
     void NodeInformation() const;

@@ -53,31 +53,31 @@ int Node<state>::getNumberOfNodes() {
 
 // Setter for visits
 template<typename state>
-void Node<state>::setVisits(int& visits) {
+void Node<state>::setVisits(const int& visits) {
     this->visits = visits;
 }
 
 // Setter for total reward
 template<typename state>
-void Node<state>::setTotalReward(Real& totalReward) { 
+void Node<state>::setTotalReward(const Real& totalReward) { 
     this->totalReward = totalReward;
  }
 
 // Setter for parent
 template<typename state>
-void Node<state>::setParent(weak_ptr<Node<state>> parent) {
+void Node<state>::setParent(const weak_ptr<Node<state>> parent) {
     this->parent = parent;
 }
 
 // Setter for children
 template<typename state> 
-void Node<state>::setChildren(vector<shared_ptr<Node<state>>> children) {
+void Node<state>::setChildren(const vector<shared_ptr<Node<state>>> children) {
     this->children = children;
 }
 
 // Setter for untried actions
 template<typename state> 
-void Node<state>::setUntriedActions(vector<int>& untried_actions) {
+void Node<state>::setUntriedActions(const vector<int>& untried_actions) {
     this->untried_actions = untried_actions;
 }
 

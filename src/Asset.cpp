@@ -2,8 +2,11 @@
 
 
 //Constructor 
-Asset::Asset(const string& name, Real& currentPrice, Real& expectedReturn, Real& risk, const string& assetClass) 
-: name(name), currentPrice(currentPrice), expectedReturn(expectedReturn), risk(risk), assetClass(assetClass)
+Asset::Asset(const string& name, const Real& currentPrice, 
+const Real& expectedReturn, const Real& risk, 
+const string& assetClass,vector<Real>&& correlations) 
+: name(name), currentPrice(currentPrice), expectedReturn(expectedReturn), 
+risk(risk), assetClass(assetClass),correlations(move(correlations))
 {
     ++numberOfAssets; // Increment the static member in the constructor
 }
@@ -22,11 +25,11 @@ string Asset::getAssetClass() const {
     return assetClass;
 }
 
-Real Asset::getcurrentPrice() const {
+Real Asset::getCurrentPrice() const {
     return currentPrice;
 }
 
-Real Asset::getexpectedReturn() const {
+Real Asset::getExpectedReturn() const {
     return expectedReturn;
 }
 
@@ -34,14 +37,11 @@ Real Asset::getRisk() const {
     return risk;
 }
 
-Real Asset::getCorrelation(int& index) const {
-    if (index >= correlations.size()) {
-        throw out_of_range("Index out of range");
-    }
-    return correlations[index];
+const vector<Real>& Asset::getCorrelations() const{
+    return correlations;
 }
 
-int Asset::getNumberOfAssets() {
+int Asset::getNumberOfAssets(){
     return numberOfAssets;
 }
 
@@ -55,40 +55,47 @@ void Asset::setAssetClass(const string& assetClass) {
     this->assetClass = assetClass;
 }
 
-void Asset::setcurrentPrice(Real& currentPrice) {
+void Asset::setCurrentPrice(const Real& currentPrice) {
     if (currentPrice < 0) {
         throw std::invalid_argument("Current price cannot be negative.");
     }
     this->currentPrice = currentPrice;
 }
 
-void Asset::setExpectedReturn(Real& expectedReturn) {
+void Asset::setExpectedReturn(const Real& expectedReturn) {
     this->expectedReturn = expectedReturn;
 }
 
-void Asset::setRisk(Real& risk) {
+void Asset::setRisk(const Real& risk) {
     if (risk < 0) {
         throw std::invalid_argument("Risk cannot be negative.");
     }
     this->risk = risk;
 }
 
-void Asset::setCorrelations(const vector<Real>& correlations) {
-    for (const Real& correlation : correlations) {
-        if (correlation < -1.0 || correlation > 1.0) {
-            throw std::invalid_argument("Correlations must be between -1 and 1.");
+void Asset::setCorrelations(const vector<Real>&& correlations) {
+    for (auto i = correlations.begin(); i!= correlations.end(); ++i) {
+        if (*i < -1.0 || *i> 1.0) {
+            throw invalid_argument("Correlations must be between -1 and 1.");
         }
     }
-    this->correlations = correlations;
+    this->correlations = move(correlations);
 }
 
 // Member functions
+
+Real Asset::getCorrelation(const int& index) const {
+    if (index < 0 || index >= static_cast<int>(correlations.size())) {
+        throw std::out_of_range("Index out of range");
+    }
+    return correlations[index];
+}
 
 // Returns an Asset information
 void Asset::AssetInformation() const {
     cout << "Asset Name : " << getName() << endl;
     cout << "Asset Class : " << getAssetClass()<< endl;
-    cout << "Current Price : " << getcurrentPrice() << endl;
-    cout << "Expected Return : " << getexpectedReturn() << endl;
+    cout << "Current Price : " << getCurrentPrice() << endl;
+    cout << "Expected Return : " << getExpectedReturn() << endl;
     cout << "Risk : " << getRisk() << endl;
 }

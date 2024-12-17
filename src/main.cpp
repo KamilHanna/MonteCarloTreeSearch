@@ -223,7 +223,7 @@ Real testSolver(Real deltaT, index_t dim) {
 */
 
 int main(int argc, char *argv[]) {
-
+/*
     string assetName = "Stock ABC";
     Real currentPrice = 150.75;
     Real expectedReturn = 0.08; // 8% return
@@ -245,7 +245,7 @@ int main(int argc, char *argv[]) {
     
     int i = 1;
     Node<Portfolio<Real>> myNode(i);
-    
+    */
     
 
 

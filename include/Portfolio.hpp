@@ -21,27 +21,25 @@ private:
 
 public :
     //Constructor
-    Portfolio(vector<Asset>& assets, vector<T>& weights);
+    Portfolio(vector<Asset>&& assets, vector<T>&& weights);
 
     //Getters
-    vector<Asset> getAssets() const;
-    vector<T> getWeights() const;
+    const vector<Asset>& getAssets() const;
+    const vector<T>& getWeights() const;
 
     //Setters
-    void setAssets(vector<Asset>& assets);
-    void setWeights(vector<T>& weights);
-    void addAsset(Asset& asset, T& weight);
+    void setAssets(vector<Asset>&& assets);
+    void setWeights(vector<T>&& weights);
   
     //Member functions
+    void addAsset(const Asset& asset, const T& weight);
     Real computePortfolioValue() const;
     Real computeExpectedReturn() const;
     Real computeRisk()  const;
     Real computeVolatility() const;
     Real computeSharpeRatio()  const;
     void PortfolioInformation() const;
-    /*
-    Functionalities to print info about a portfolio (even more stuff like VaR...)    
-    */
+
 };
 
 #endif //PORTFOLIO_HPP
