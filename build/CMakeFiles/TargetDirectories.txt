@@ -1,3 +1,0 @@
-/home/viken/Desktop/MCTS_AMSC/MonteCarloTreeSearch/build/CMakeFiles/rebuild_cache.dir
-/home/viken/Desktop/MCTS_AMSC/MonteCarloTreeSearch/build/CMakeFiles/edit_cache.dir
-/home/viken/Desktop/MCTS_AMSC/MonteCarloTreeSearch/build/CMakeFiles/MCTS_EXEC.dir
