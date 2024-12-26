@@ -30,19 +30,14 @@ void Portfolio<T>::setWeights(vector<T>&& weights) {
 
 //Member functions
 
-// Adds an asset to the portfolio
-template <typename T>
-void Portfolio<T>::addAsset(const Asset& asset, const T& weight) {
-    assets.emplace_back(asset);
-    weights.emplace_back(weight);
-}    
-
 // Computes and returns value of the portfolio
 template <typename T>
 Real Portfolio<T>::computePortfolioValue() const {
     Real portfolioValue = 0;
-    for (int i = 0; i < assets.size(); i++) {
-        portfolioValue += assets[i].getCurrentPrice() * weights[i];
+    for (auto asseti = assets.begin(), weighti = weights.begin(); 
+        asseti != assets.end() && weighti != weights.end(); 
+        ++asseti, ++weighti) {
+        portfolioValue += asseti->getCurrentPrice() * (*weighti);
     }
     return portfolioValue;
 }
@@ -51,13 +46,15 @@ Real Portfolio<T>::computePortfolioValue() const {
 template <typename T>
 Real Portfolio<T>::computeExpectedReturn() const {
     Real expectedReturn = 0;
-    for (int i = 0; i < assets.size(); i++) {
-        expectedReturn += assets[i].getExpectedReturn() * weights[i];
+    for(auto asseti = assets.begin(), weighti = weights.begin(); 
+        asseti != assets.end() && weighti != weights.end(); 
+        ++asseti, ++weighti) {
+        expectedReturn += asseti->getExpectedReturn() * (*weighti);
     }
     return expectedReturn;
 }
 
-// Computes and returns risk (Variance) of the portfolio
+// Computes and returns risk of the portfolio
 template <typename T> 
 Real Portfolio<T>::computeRisk() const{
     Real risk = 0;
@@ -82,8 +79,69 @@ Real Portfolio<T>::computeVolatility() const {
 // Computes and returns Sharpe ratio of the portfolio
 template <typename T>
 Real Portfolio<T>::computeSharpeRatio() const{
-    return (computeExpectedReturn() - Constants::RiskFreeRate) / computeVolatility(); // 0.02 is the risk free rate
+    return (computeExpectedReturn() - Constants::RiskFreeRate) / computeVolatility(); 
 }
+
+// Randomly assign weights, ensuring they sum to 1 and respect constraints
+template <typename T>
+void Portfolio<T>::initializeWeights() {
+    T totalWeight = 0;
+    
+    for(auto weighti = weights.begin(); weighti != weights.end(); ++weighti) {
+        T randomWeight = static_cast<T>(rand()) / RAND_MAX;  // Random between 0 and 1
+        *weighti = randomWeight;
+        totalWeight += randomWeight;
+    }
+
+    // Normalizing weights so they sum to 1
+    for (auto it = weights.begin(); it != weights.end(); ++it) {
+        *it /= totalWeight;
+    }
+}
+
+template <typename T>
+void Portfolio<T>::rebalanceSectorWeights(const vector<SectorConstraint>& sectorConstraints) {
+       constexpr std::array<Real, num_sectors> max_weights = {
+
+        Constraints::max_weights[]
+  
+    for (const auto& constraint : sectorConstraints) {
+        T sectorWeight = computeSectorWeight(constraint.sectorName); // Calculate sector weight
+        for (size_t i = 0; i < assets.size(); ++i) {
+            if (assets[i].sector == constraint.sectorName) {
+                if (sectorWeight > constraint.maxWeight) {
+                    // Reduce sector weight
+                    weights[i] = max(weights[i] - 0.01, MinWeight);
+                } else if (sectorWeight < constraint.minWeight) {
+                    // Increase sector weight
+                    weights[i] = min(weights[i] + 0.01, MaxWeight);
+                }
+            }
+        }
+    }
+    normalizeWeights(); // Ensure weights sum to 1
+}
+
+template <typename T>
+void Portfolio<T>::printWeights() const {
+    std::cout << "Weights: ";
+       for(auto weighti = weights.begin(); weighti != weights.end(); ++weighti) {
+        std::cout << *weighti << " ";
+    } 
+        std::cout << std::endl;
+}
+
+template <typename T>
+Real Portfolio<T>::simulatePerformance() const {
+    Real expectedReturn = computeExpectedReturn();
+    Real risk = computeRisk();
+    Real sharpeRatio = computeSharpeRatio();
+
+    // A weighted combination of Sharpe ratio and risk-return tradeoff
+    Real performanceScore = sharpeRatio + (expectedReturn - Constants::risk_aversion * risk);
+    
+    return performanceScore;
+} 
 
 template <typename T>
 void Portfolio<T>::PortfolioInformation() const {

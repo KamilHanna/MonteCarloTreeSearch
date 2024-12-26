@@ -2,11 +2,11 @@
 
 //Constructor
 template <typename state>
-Node<state>::Node(int& id) :id(id){
+Node<state>::Node(int& id, state &&portfolio) :id(id), portfolio(move(portfolio)) {
     numberOfNodes++;
 }
 
-template<typename state>
+template <typename state>
 Node<state>::~Node() {
     --numberOfNodes; // Decrement the static member in the destructor
 }
@@ -23,6 +23,12 @@ int Node<state>::getId() const {
 template<typename state>
 int Node<state>::getVisits() const {
     return visits;
+}
+
+// Getter for portfolio
+template<typename state>
+state &Node<state>::getPortfolio() {
+    return portfolio;
 }
 
 // Getter for total reward
@@ -63,6 +69,12 @@ void Node<state>::setTotalReward(const Real& totalReward) {
     this->totalReward = totalReward;
  }
 
+// Setter for portfolio
+template<typename state>
+void Node<state>::setPortfolio(state&& portfolio) {
+    this->portfolio = move(portfolio);
+}
+
 // Setter for parent
 template<typename state>
 void Node<state>::setParent(const weak_ptr<Node<state>> parent) {
@@ -73,12 +85,6 @@ void Node<state>::setParent(const weak_ptr<Node<state>> parent) {
 template<typename state> 
 void Node<state>::setChildren(const vector<shared_ptr<Node<state>>> children) {
     this->children = children;
-}
-
-// Setter for untried actions
-template<typename state> 
-void Node<state>::setUntriedActions(const vector<int>& untried_actions) {
-    this->untried_actions = untried_actions;
 }
 
 // Returns a node's information
@@ -96,7 +102,6 @@ void Node<state>::NodeInformation() const {
     }
 
     cout << "Number of children: " << getChildren().size() << endl;
-    //cout << "Number of untried actions: " << getUntriedActions().size() << endl;
 }
 
 template class Node<Portfolio<Real>>;

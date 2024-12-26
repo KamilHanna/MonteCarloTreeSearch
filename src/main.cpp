@@ -1,12 +1,15 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <cmath>
 #include <vector>
+#include <string>
 #include <chrono>
 
-#include "Asset.hpp"
 #include "Node.hpp"
-#include "Portfolio.hpp"   
+#include "Portfolio.hpp"
+#include "Asset.hpp"
+#include "Utils.hpp"
 
 using namespace std;
 /*
@@ -223,19 +226,39 @@ Real testSolver(Real deltaT, index_t dim) {
 */
 
 int main(int argc, char *argv[]) {
-/*
-    string assetName = "Stock ABC";
-    Real currentPrice = 150.75;
-    Real expectedReturn = 0.08; // 8% return
-    Real risk = 0.15;           // 15% risk
-    string assetClass = "Equity";
-    string assetName2 = "Stock XYZ";
-    // Create an Asset object using the constructor
-    Asset myAsset(assetName, currentPrice, expectedReturn, risk, assetClass);
-    Asset myAsset2(assetName2, currentPrice, expectedReturn, expectedReturn, assetName2);
-    myAsset.AssetInformation();
-    myAsset2.AssetInformation();
 
+    vector<Asset> assets = readStockAndCorrelations(10,
+     "/home/viken/Desktop/MCTS_AMSC/MonteCarloTreeSearch/Python/Stocks.csv", 
+     "/home/viken/Desktop/MCTS_AMSC/MonteCarloTreeSearch/Python/correlation_matrix.csv");
+
+    // Output the data
+   // for (const auto& asset : assets) {
+     //   asset.AssetInformation();
+     //   cout << "CORR"<< asset.getCorrelation(2) << endl;
+    //}
+
+    vector<Real> weights(Asset::getNumberOfAssets());
+
+    Portfolio<Real> myPortfolio(move(assets), move(weights));
+    myPortfolio.initializeWeights();
+
+    int i = 1;
+    Node<Portfolio<Real>> myNode(i,move(myPortfolio));
+   
+
+    myNode.getPortfolio().initializeWeights();
+
+    Real y = myNode.getPortfolio().simulatePerformance();
+    Real y2 = myNode.getPortfolio().computePortfolioValue();
+    
+    cout <<"Portfolio Performance :" << y << endl;
+
+    cout << "Portfolio Value :" << y2 << endl;
+
+    myNode.getPortfolio().printWeights();
+    
+
+/*
     // Create a Portfolio object
 
     vector<Asset> assets = {myAsset, myAsset2};
@@ -245,43 +268,8 @@ int main(int argc, char *argv[]) {
     
     int i = 1;
     Node<Portfolio<Real>> myNode(i);
-    */
     
-
-
-/*
-    // dividing the timestep size to half
-    std::vector<Real> deltaTs = {0.001, 0.0005, 0.00025};
-    std::vector<index_t> dims = {4, 8, 16, 32, 64};
-
-    std::vector<Real> error;
-
-    // wrt deltaT
-    // for (size_t i=0; i<deltaTs.size(); ++i){
-    //     Real deltaT = deltaTs[i];
-    //     index_t dim = dims[3];
-    //     error.push_back(testSolver(deltaT, dim));
-    // }
-
-
-    // wrt dim
-    for (long dim: dims) {
-        Real deltaT = deltaTs[0]; // first
-        error.push_back(testSolver(deltaT, dim));
-    }
-
-
-    // // wrt both
-    // for (size_t i=0; i<dims.size(); ++i){
-    //     Real deltaT = deltaT[i];
-    //     index_t dim = dims[i];
-    //     error.push_back(testSolver(deltaT, dim));
-    // }
-
-    std::ofstream csvFile("output.csv");
-    csvFile << "step,error" << std::endl;
-    for (int i = 0; i < dims.size(); ++i) csvFile << dims[i] << "," << error[i] << std::endl;
-*/
-
+    */
     return 0;
 }
+

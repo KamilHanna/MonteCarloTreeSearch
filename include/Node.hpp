@@ -24,46 +24,37 @@ class Node {
 
 private:
     const int id;                                      // ID of a node
+    state portfolio;                                   // Portfolio of the node
     int visits = 0;                                    // Number of times the node has been visited
     Real totalReward = 0.0;                            // The total reward of the node
     weak_ptr<Node<state>> parent;                      // The parent of the current node
     vector<shared_ptr<Node<state>>> children;          // The children of the current node
-    vector<int> untried_actions;                       // The untried actions of the current node
     inline static int numberOfNodes = 0;               // Number of nodes created
-
-    //shared_ptr<state> node_state; // Portfolio, represents current state of the node
 
 public :
     //Constructor
-    Node(int& id);
+    Node(int& id, state &&portfolio);
     //Destructor
     ~Node();
 
     //Getters
     int getId() const;
     int getVisits() const;
+    state &getPortfolio();
     Real getTotalReward() const;
     shared_ptr<Node<state>> getParent() const;
     vector<shared_ptr<Node<state>>> getChildren() const;
-    //vector<int> getUntriedActions() const;
     static int getNumberOfNodes();
 
     //Setters
     void setVisits(const int& visits);
     void setTotalReward(const Real& totalReward);
+    void setPortfolio(state&& portfolio);
     void setParent(const weak_ptr<Node<state>> parent);
     void setChildren(const vector<shared_ptr<Node<state>>> children);
-    void setUntriedActions(const vector<int>& untried_actions);
 
     //Member functions
-    void NodeInformation() const;
-    
-    /*
-    Add children.... Instead of setting children, we can add children to the vector of children
-
-    also update visits..
-    actions too.
-    */
+    void NodeInformation() const; 
 };
 
 #endif //NODE_HPP
