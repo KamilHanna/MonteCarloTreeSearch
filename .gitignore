@@ -1,6 +1,6 @@
 # Ignore the .gitignore file
 .gitignore
-
+trash.txt
 # Build directory
 build/
 
