@@ -6,6 +6,10 @@
 #include <fstream>
 #include <vector>
 #include <cmath>
+#include <algorithm> 
+#include <numeric>   
+
+
 #include "Constants.hpp"
 #include "Types.hpp"
 #include "Asset.hpp"
@@ -40,9 +44,17 @@ public :
     Real computeSharpeRatio() const;
     Real simulatePerformance() const;
 
+    Real computeAverageReturn(const int &start_idx, const int &end_idx) const;
+    Real computeAverageRisk(const int &start_idx, const int &end_idx) const;
+
     void initializeWeights();
     void printWeights() const;
     void PortfolioInformation() const;
+
+    //Actions
+    void Action1(Real &adjustment_value,const Constraints::Sector& sector);
+    void Action2(Real &adjustment_value,const Constraints::Sector& sector);
+
 
 };
 

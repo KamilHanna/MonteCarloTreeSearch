@@ -1,0 +1,163 @@
+
+/*
+template <typename T>
+void Portfolio<T>::initializeWeights() {
+    T totalWeight = 0;
+    
+    for(auto weighti = weights.begin(); weighti != weights.end(); ++weighti) {
+        T randomWeight = static_cast<T>(rand()) / RAND_MAX;  // Random between 0 and 1
+        *weighti = randomWeight;
+        totalWeight += randomWeight;
+    }
+
+    // Normalizing weights so they sum to 1
+    for (auto it = weights.begin(); it != weights.end(); ++it) {
+        *it /= totalWeight;
+    }
+}
+*/
+
+/*
+template <typename T>
+void Portfolio<T>::initializeWeights(const vector<SectorConstraint>& sectorConstraints) {
+       constexpr std::array<Real, num_sectors> max_weights = {
+
+        Constraints::max_weights[]
+  
+    for (const auto& constraint : sectorConstraints) {
+        T sectorWeight = computeSectorWeight(constraint.sectorName); // Calculate sector weight
+        for (size_t i = 0; i < assets.size(); ++i) {
+            if (assets[i].sector == constraint.sectorName) {
+                if (sectorWeight > constraint.maxWeight) {
+                    // Reduce sector weight
+                    weights[i] = max(weights[i] - 0.01, MinWeight);
+                } else if (sectorWeight < constraint.minWeight) {
+                    // Increase sector weight
+                    weights[i] = min(weights[i] + 0.01, MaxWeight);
+                }
+            }
+        }
+    }
+    normalizeWeights(); // Ensure weights sum to 1
+}
+*/
+
+
+/*
+    // Create a Portfolio object
+
+    vector<Asset> assets = {myAsset, myAsset2};
+    vector<Real> weights = {0.5, 0.5};
+
+    Portfolio<Real> myPortfolio(assets, weights);
+    
+    int i = 1;
+    Node<Portfolio<Real>> myNode(i);
+    
+    */
+
+
+
+
+// Function to retrieve the stock data and correlations from the given files
+vector<Asset> readStockAndCorrelations(const int& AssetCount, const string& stockFilename, const string& correlationsFilename) {
+    vector<Asset> assets;
+    assets.reserve(AssetCount);
+
+    ifstream stockFile(stockFilename);
+    ifstream correlationFile(correlationsFilename);
+
+    // Check if both files opened successfully
+    if (!stockFile.is_open() || !correlationFile.is_open()) {
+        std::cerr << "Error: Could not open one or both files" << std::endl;
+        return {};
+    }
+
+    string line;
+
+    // Skip the header line in the stock file
+    getline(stockFile, line);
+    // Skip the header line in the correlation file
+    getline(correlationFile, line);
+
+    // Read both files line by line in parallel
+    while (getline(stockFile, line)) {
+        stringstream ss(line);
+        string name, assetClass, temp;
+        Real expectedReturn, risk, currentPrice;
+        vector<Real> correlations(AssetCount);
+
+        // Read stock data
+        getline(ss, name, ',');
+        getline(ss, assetClass, ',');
+
+        try {
+            getline(ss, temp, ',');
+            std::cout << "Parsing expectedReturn: " << temp << std::endl;
+            expectedReturn = std::stod(temp);
+
+            getline(ss, temp, ',');
+            std::cout << "Parsing risk: " << temp << std::endl;
+            risk = std::stod(temp);
+
+            getline(ss, temp, ',');
+            std::cout << "Parsing currentPrice: " << temp << std::endl;
+            currentPrice = std::stod(temp);
+
+            // Read correlation data
+            for (int i = 0; i < AssetCount; ++i) {
+                getline(correlationFile, temp, ',');
+                std::cout << "Parsing correlation[" << i << "]: " << temp << std::endl;
+                correlations[i] = std::stod(temp);
+            }
+
+            assets.emplace_back(name, currentPrice, expectedReturn, risk, assetClass, std::move(correlations));
+        } catch (const std::invalid_argument& e) {
+            std::cerr << "Invalid argument: " << e.what() << " in line: " << line << std::endl;
+            throw;
+        } catch (const std::out_of_range& e) {
+            std::cerr << "Out of range: " << e.what() << " in line: " << line << std::endl;
+            throw;
+        }
+    }
+
+    return assets;
+}
+
+MAIN OLD STUFF :
+
+    // Output the data
+   // for (const auto& asset : assets) {
+     //   asset.AssetInformation();
+     //   cout << "CORR"<< asset.getCorrelation(2) << endl;
+    //}
+
+/*
+    Real y = myNode.getPortfolio().simulatePerformance();
+    Real y2 = myNode.getPortfolio().computePortfolioValue();
+    
+    cout <<"Portfolio Performance :" << y << endl;
+
+    cout << "Portfolio Value :" << y2 << endl;
+
+    myNode.getPortfolio().printWeights();
+
+    cout <<"Action 1" << endl;
+    Real lol = 0.001;
+    myNode.getPortfolio().Action1(lol, Constraints::sectors[0]);
+
+    myNode.getPortfolio().printWeights();
+
+    cout <<"Action 2" << endl;
+    myNode.getPortfolio().Action2(lol, Constraints::sectors[0]);
+    myNode.getPortfolio().printWeights();
+*/
+
+
+
+
+void MCTS::simulate() {
+    for(int i = 0; i < root.getChildren().size(); i++) {
+        root.getChildren()[i]->setTotalReward(root.getChildren()[i]->getPortfolio().simulatePerformance());
+    }
+}

@@ -82,44 +82,26 @@ Real Portfolio<T>::computeSharpeRatio() const{
     return (computeExpectedReturn() - Constants::RiskFreeRate) / computeVolatility(); 
 }
 
-// Randomly assign weights, ensuring they sum to 1 and respect constraints
 template <typename T>
-void Portfolio<T>::initializeWeights() {
-    T totalWeight = 0;
-    
-    for(auto weighti = weights.begin(); weighti != weights.end(); ++weighti) {
-        T randomWeight = static_cast<T>(rand()) / RAND_MAX;  // Random between 0 and 1
-        *weighti = randomWeight;
-        totalWeight += randomWeight;
+Real Portfolio<T>::computeAverageReturn(const int &start_idx, const int &end_idx) const {
+    Real averageReturn = 0;
+    int count = 0;
+    for (int i = start_idx; i <= end_idx && i < assets.size(); ++i) {
+        averageReturn += assets[i].getExpectedReturn();
+        ++count;
     }
-
-    // Normalizing weights so they sum to 1
-    for (auto it = weights.begin(); it != weights.end(); ++it) {
-        *it /= totalWeight;
-    }
+    return count > 0 ? averageReturn / count : 0;
 }
 
 template <typename T>
-void Portfolio<T>::rebalanceSectorWeights(const vector<SectorConstraint>& sectorConstraints) {
-       constexpr std::array<Real, num_sectors> max_weights = {
-
-        Constraints::max_weights[]
-  
-    for (const auto& constraint : sectorConstraints) {
-        T sectorWeight = computeSectorWeight(constraint.sectorName); // Calculate sector weight
-        for (size_t i = 0; i < assets.size(); ++i) {
-            if (assets[i].sector == constraint.sectorName) {
-                if (sectorWeight > constraint.maxWeight) {
-                    // Reduce sector weight
-                    weights[i] = max(weights[i] - 0.01, MinWeight);
-                } else if (sectorWeight < constraint.minWeight) {
-                    // Increase sector weight
-                    weights[i] = min(weights[i] + 0.01, MaxWeight);
-                }
-            }
-        }
+Real Portfolio<T>::computeAverageRisk(const int &start_idx, const int &end_idx) const {
+    Real averageRisk = 0;
+    int count = 0;
+    for (int i = start_idx; i <= end_idx && i < assets.size(); ++i) {
+        averageRisk += assets[i].getRisk();
+        ++count;
     }
-    normalizeWeights(); // Ensure weights sum to 1
+    return count > 0 ? averageRisk / count : 0;
 }
 
 template <typename T>
@@ -153,13 +135,144 @@ void Portfolio<T>::PortfolioInformation() const {
     cout << "Portfolio Value: " << computePortfolioValue() << " $" << endl;
     cout << "Portfolio Volatility: " << computeVolatility() << endl;
     cout << "*************************" << endl;
+}
+
+
+// Assigning weights based on sector constraints.
+template<typename T>
+void Portfolio<T>::initializeWeights(){
     
-    for (int i = 0; i < assets.size(); i++) {
-        assets[i].AssetInformation();
-        cout << "Asset Weight: " << weights[i] << endl;
-        cout << "*************************" << endl;
+    // Set all weights to 1
+    for(auto weighti = weights.begin(); weighti != weights.end(); ++weighti) {
+        *weighti = 1.0;
+    }
+
+    //Normalizing weights so they match Sector total weight constraints
+    for (const auto& sector : Constraints::sectors) {
+        Real sectorWeight = 0;
+        for (int i = sector.start_index; i <= sector.end_index; ++i) {
+            sectorWeight += weights[i];
+        }
+        Real normfactor = sector.max_weight/sectorWeight;
+
+        for (int i = sector.start_index; i <= sector.end_index; ++i) {
+            weights[i] = weights[i] * normfactor;
+        }
     }
 }
+
+
+//Action Space :
+//Action 1: Adjust the asset weights gradually based on returns of the assets.
+
+template <typename T>
+void Portfolio<T>::Action1(Real &adjustment_value,const Constraints::Sector& sector){
+
+    //# Compute the average return
+    Real average_return = computeAverageReturn(sector.start_index, sector.end_index);
+
+    //# Compute the total adjustment distance from the average return
+    Real total_distance = 0;
+    for (int i = sector.start_index; i <= sector.end_index && i < assets.size(); ++i) {
+        total_distance += std::abs(assets[i].getExpectedReturn() - average_return);
+    }
+
+    //# If total distance is 0, no adjustment can be made
+    if (total_distance == 0) {
+        return;
+    }
+    else {
+        for (int i = sector.start_index; i <= sector.end_index && i < assets.size(); ++i) {
+            Real return_distance = assets[i].getExpectedReturn() - average_return;
+
+            //# Scale the adjustment value based on distances
+            Real scaled_adjustment = (std::abs(return_distance) / total_distance) * adjustment_value;
+
+            //# Adjust weights while respecting the max and min constraints
+            if (return_distance > 0) {
+                if (weights[i] + scaled_adjustment <= Constraints::MaxAssetWeight) {
+                    weights[i] += scaled_adjustment;
+                } else {
+                    weights[i] = Constraints::MaxAssetWeight;
+                }
+            } else {
+                if (weights[i] - scaled_adjustment >= Constraints::MinAssetWeight) {
+                    weights[i] -= scaled_adjustment;
+                } else {
+                    weights[i] = Constraints::MinAssetWeight;
+                }
+            }
+        }
+
+    }
+
+    //Normalizing weights so they match Sector total weight constraints
+    Real sectorWeight = 0;
+    for (int i =  sector.start_index ; i <= sector.end_index && i < assets.size(); ++i) {
+        sectorWeight += weights[i];
+    }
+    Real normfactor = sector.max_weight/sectorWeight;
+
+    for (int i = sector.start_index; i <= sector.end_index; ++i) {
+            weights[i] = weights[i] * normfactor;
+    }
+}
+
+//Action 2: Adjust the asset weights gradually based on returns of the risk of the assets.
+
+template <typename T>
+void Portfolio<T>::Action2(Real &adjustment_value,const Constraints::Sector& sector){
+
+    //# Compute the average return
+    Real average_risk = computeAverageRisk(sector.start_index, sector.end_index);
+
+    //# Compute the total adjustment distance from the average risk
+    Real total_distance = 0;
+    for (int i = sector.start_index; i <= sector.end_index && i < assets.size(); ++i) {
+        total_distance += std::abs(assets[i].getRisk() - average_risk);
+    }
+
+    //# If total distance is 0, no adjustment can be made
+    if (total_distance == 0) {
+        return;
+    }
+    else {
+        for (int i = sector.start_index; i <= sector.end_index && i < assets.size(); ++i) {
+            Real risk_distance = assets[i].getRisk() - average_risk;
+
+            //# Scale the adjustment value based on distances
+            Real scaled_adjustment = (std::abs(risk_distance) / total_distance) * adjustment_value;
+
+            //# Adjust weights while respecting the max and min constraints
+            if (risk_distance < 0) {
+                if (weights[i] + scaled_adjustment <= Constraints::MaxAssetWeight) {
+                    weights[i] += scaled_adjustment;
+                } else {
+                    weights[i] = Constraints::MaxAssetWeight;
+                }
+            } else {
+                if (weights[i] - scaled_adjustment >= Constraints::MinAssetWeight) {
+                    weights[i] -= scaled_adjustment;
+                } else {
+                    weights[i] = Constraints::MinAssetWeight;
+                }
+            }
+        }
+
+    }
+
+    //Normalizing weights so they match Sector total weight constraints
+    Real sectorWeight = 0;
+    for (int i =  sector.start_index ; i <= sector.end_index && i < assets.size(); ++i) {
+        sectorWeight += weights[i];
+    }
+    Real normfactor = sector.max_weight/sectorWeight;
+
+    for (int i = sector.start_index; i <= sector.end_index; ++i) {
+            weights[i] = weights[i] * normfactor;
+    }
+}
+
 
 template class Portfolio<Real>;
 

@@ -2,7 +2,7 @@
 
 //Constructor
 template <typename state>
-Node<state>::Node(int& id, state &&portfolio) :id(id), portfolio(move(portfolio)) {
+Node<state>::Node(state &&portfolio) : portfolio(move(portfolio)) {
     numberOfNodes++;
 }
 
@@ -13,11 +13,6 @@ Node<state>::~Node() {
 
 // Getters 
 
-// Getter for ID
-template<typename state>
-int Node<state>::getId() const {
-    return id;
-}
 
 // Getter for visits
 template<typename state>
@@ -37,11 +32,6 @@ Real Node<state>::getTotalReward() const {
     return totalReward;
 }
 
-// Getter for parent
-template<typename state>
-shared_ptr<Node<state>> Node<state>::getParent() const {
-    return parent.lock();
-}
 
 // Getter for children
 template<typename state>
@@ -75,11 +65,6 @@ void Node<state>::setPortfolio(state&& portfolio) {
     this->portfolio = move(portfolio);
 }
 
-// Setter for parent
-template<typename state>
-void Node<state>::setParent(const weak_ptr<Node<state>> parent) {
-    this->parent = parent;
-}
 
 // Setter for children
 template<typename state> 
@@ -87,20 +72,27 @@ void Node<state>::setChildren(const vector<shared_ptr<Node<state>>> children) {
     this->children = children;
 }
 
+template<typename state>
+Real Node<state>::computeUCB1(const Real& parentVisits) const {
+
+    //If the node has never been visited, return infinity to encourage exploration
+    if(visits == 0) {
+        //we are not using this since we are not using the UCB1 formula for the root node.
+        return std::numeric_limits<Real>::infinity();
+    }
+
+    //UCB1 formula: exploitation + exploration
+    Real exploitation = totalReward / visits; //Average reward
+    Real exploration = Constants::explorationConstant * std::sqrt(parentVisits / visits);
+
+    return exploitation + exploration;
+}
+
 // Returns a node's information
 template<typename state>
 void Node<state>::NodeInformation() const {
-    cout << "Node ID: " << getId() << endl;
     cout << "Number of visits: " << getVisits() << endl;
     cout << "Total reward: " << getTotalReward() << endl;
-
-    auto parentPtr = getParent();
-    if (parentPtr) {
-        cout << "Parent ID: " << parentPtr->getId() << endl;
-    } else {
-        cout << "This node is the root of the tree." << endl;
-    }
-
     cout << "Number of children: " << getChildren().size() << endl;
 }
 

@@ -32,9 +32,11 @@ namespace Constraints {
         {"Materials", 0.0197, 475, 502}
     }};
     
-    constexpr Tiny MinAssetWeight = 0.00001;   // 0.001%
-    constexpr Tiny MaxAssetWeight = 0.025;    // 2.5%
-    
+    constexpr Tiny MinAssetWeight = 0.000001;   // 0.0001% / 10e-6
+    constexpr Tiny MaxAssetWeight = 0.025;    // 2.5% / 2.5e-2
+
+    constexpr Real min_adjustment = 1e-5;
+    constexpr Real max_adjustment = 5e-4;    
 }
 
 #endif // CONSTRAINTS_HPP

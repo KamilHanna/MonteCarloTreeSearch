@@ -1,7 +1,7 @@
 #ifndef CONSTANTS_HPP
 #define CONSTANTS_HPP
 
-
+#include "Types.hpp"
 /*
  *
  * @constant : {Risk-Free Rate} :
@@ -25,7 +25,11 @@ namespace Constants {
 
     constexpr Tiny RiskFreeRate = 0.0443; 
     // Tune this parameter based on the risk preference
-    constexpr Tiny risk_aversion = 0.4;   
+    constexpr Tiny risk_aversion = 0.4;
+    
+    // Tune this parameter based on your preference
+    // Exploration constant for UCB1 (MCTS)
+    constexpr Tiny explorationConstant = 1.41;   
       
 }
 

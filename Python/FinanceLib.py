@@ -34,9 +34,6 @@ import pandas as pd
 import yfinance as yf
 import matplotlib.pyplot as plt
 
-'''
-Stocks.csv functions
-'''
 
 # Function to initialize the stocks and correlations file.
 def initialize_stocks(filename,_period):
@@ -49,17 +46,22 @@ def initialize_stocks(filename,_period):
     
     get_current_price(df)
 
+    # Fill NaN values with 0
+    df = df.fillna(0)
     #Save the final DataFrame.
     df.to_csv('Stocks.csv', index=False)
     stocks_info(df)
-
+    
     sector_indices = get_sector_indices(df)
     df_returns.to_csv('returns.csv', index=False)
 
     df_corr =pd.DataFrame()
     df_corr = get_correlations(df_returns)
+    
+    # Fill NaN values with 0
+    df_corr = df_corr.fillna(0)
     df_corr.to_csv('correlation_matrix.csv', index=False)
-
+    
     return df, df_corr, sector_indices
 
 # Function to print the stocks information
