@@ -77,3 +77,75 @@ vector<Real> generate_adjustment_values(const int& N) {
     std::sort(adjustments.begin(), adjustments.end());
     return adjustments;
 }
+
+
+// Function to print "MCTS" using special symbols
+void print_mcts_banner() {
+    std::cout << "#########################################" << std::endl;
+    std::cout << "#  MM     MM   @@@@@@   TTTTT  $$$$$$   #" << std::endl;
+    std::cout << "#  MMM   MMM  @           T    $        #" << std::endl;
+    std::cout << "#  MM M M MM  @           T     $$$$    #" << std::endl;
+    std::cout << "#  MM  M  MM  @           T         $   #" << std::endl;
+    std::cout << "#  MM     MM   @@@@@@     T    $$$$$$   #" << std::endl;
+    std::cout << "#########################################\n" << std::endl;
+}
+
+// Function to setup the MCTS
+void MCTS_setup() {
+
+    void print_mcts_banner();
+    int simulations, horizontalScaling,EarlyStopping;
+    bool finetuning;
+    std::cout << "**Enter the number of simulations: ";
+    std::cin >> simulations;
+
+    std::cout << "Note [Horizontal scaling expands each child node from the 11 sectors," <<
+    "by duplicating them and applying an action on each with different weight adjustment" <<
+    "value.Horizontal Scaling = size of adjutment values vector ] " << std::endl;
+    
+    std::cout << "**Enter the horizontal scaling factor: ";
+    std::cin >> horizontalScaling;
+
+    std::cout << "**Enter the early stopping factor: ";
+    std::cin >> EarlyStopping;
+
+    std::cout << "Note [Fine tuning applies the third Action from the action space,"<<
+    "which adjusts the portfolio overall based on asset correlations instead of sector based adjustments." << std::endl;
+    
+
+    std::cout << "**Enter 1 for finetuning, 0 for no finetuning: ";
+    std::cin >> finetuning;
+
+    try{
+        vector<Asset> assets = readStockAndCorrelations(NumberOfAssets,
+        "../Python/Stocks.csv", 
+        "../Python/correlation_matrix.csv");
+
+        vector<Real> weights(Asset::getNumberOfAssets());
+
+        Portfolio<Real> myPortfolio(move(assets), move(weights));
+        myPortfolio.initializeWeights();
+
+        Node<Portfolio<Real>> myNode(move(myPortfolio));
+    
+
+        myNode.getPortfolio().initializeWeights();
+        cout << myNode.getPortfolio().computeSharpeRatio() << endl;
+        MCTS myMCTS(move(myNode), simulations, horizontalScaling, finetuning, EarlyStopping);
+        
+        myMCTS.MCTSInformation();
+        
+        //Computing Execution time.
+        auto start = chrono::high_resolution_clock::now();
+        myMCTS.startMCTS();
+        auto stop = chrono::high_resolution_clock::now();
+        auto duration = chrono::duration_cast<chrono::milliseconds>(stop - start);
+        cout << "Execution time : " << duration.count() << " milliseconds" << endl;
+
+
+    }catch (const std::exception& e) {
+        std::cerr << "Exception: " << e.what() << std::endl;
+    }
+
+}
+

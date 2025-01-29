@@ -166,7 +166,7 @@ void Portfolio<T>::initializeWeights(){
 //Action 1: Adjust the asset weights gradually based on returns of the assets.
 
 template <typename T>
-void Portfolio<T>::Action1(Real &adjustment_value,const Constraints::Sector& sector){
+void Portfolio<T>::Action1(const Real &adjustment_value,const Constraints::Sector& sector){
 
     //# Compute the average return
     Real average_return = computeAverageReturn(sector.start_index, sector.end_index);
@@ -221,7 +221,7 @@ void Portfolio<T>::Action1(Real &adjustment_value,const Constraints::Sector& sec
 //Action 2: Adjust the asset weights gradually based on returns of the risk of the assets.
 
 template <typename T>
-void Portfolio<T>::Action2(Real &adjustment_value,const Constraints::Sector& sector){
+void Portfolio<T>::Action2(const Real &adjustment_value,const Constraints::Sector& sector){
 
     //# Compute the average return
     Real average_risk = computeAverageRisk(sector.start_index, sector.end_index);
@@ -273,6 +273,37 @@ void Portfolio<T>::Action2(Real &adjustment_value,const Constraints::Sector& sec
     }
 }
 
+//Fine tuning
+//Action 3: Adjust the portfolio overall based on asset correlations.
+template <typename T>
+void Portfolio<T>::Action3(const Real &adjustment_value){
+
+    for (int i = 0; i < assets.size(); ++i) {
+        for (int j = 0; j < assets.size(); ++j) {
+            if (i != j) {
+                Real correlation = assets[i].getCorrelation(j);
+                Real correlation_distance = correlation - 0.5;
+
+                Real scaled_adjustment = std::abs(correlation_distance) * adjustment_value;
+
+                if (correlation_distance < 0) {
+                    if (weights[i] + scaled_adjustment <= Constraints::MaxAssetWeight) {
+                        weights[i] += scaled_adjustment;
+                    } else {
+                        weights[i] = Constraints::MaxAssetWeight;
+                    }
+                } else {
+                    if (weights[i] - scaled_adjustment >= Constraints::MinAssetWeight) {
+                        weights[i] -= scaled_adjustment;
+                    } else {
+                        weights[i] = Constraints::MinAssetWeight;
+                    }
+                }
+            }
+        }
+    }
+
+}
 
 template class Portfolio<Real>;
 

@@ -6,6 +6,9 @@
 
 #include <cmath>
 #include <limits>
+#include <memory>
+#include <omp.h>
+#include <mpi.h>
 
 class MCTS {
 private:
@@ -21,7 +24,7 @@ private:
 public:
 
     //Constructor
-    MCTS(Node<Portfolio<Real>>&& root, const int& NumberOfSimulations, const int& treeWidth,
+    MCTS(Node<Portfolio<Real>>&& root, const int& NumberOfSimulations,
     const int& HorizontalScaling, const bool& finetuning, const int& EarlyStopping);
 
     //Getters

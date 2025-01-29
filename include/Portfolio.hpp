@@ -52,9 +52,9 @@ public :
     void PortfolioInformation() const;
 
     //Actions
-    void Action1(Real &adjustment_value,const Constraints::Sector& sector);
-    void Action2(Real &adjustment_value,const Constraints::Sector& sector);
-
+    void Action1(const Real &adjustment_value,const Constraints::Sector& sector);
+    void Action2(const Real &adjustment_value,const Constraints::Sector& sector);
+    void Action3(const Real &adjustment_value);
 
 };
 
