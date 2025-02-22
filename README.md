@@ -1,7 +1,8 @@
 # MonteCarloTreeSearch
 ## Overview
 
-This is an implementation of the Monte Carlo Tree Search Algorithm for optimizing the S&P 500 Index.
+This is an implementation of the Monte Carlo Tree Search Algorithm for Index optimization. 
+the use case provided is for S&P 500 Index.
 
 This is part of a project-work for Advanced Method for Scientific Computing course [@Polimi](https://www.polimi.it/)
 

@@ -23,10 +23,13 @@ Execution of this file will result in generating 3 files :
 2. returns.csv : Contains the returns of the stocks.
 3. correlation_matrix.csv : Contains the correlation matrix of the stocks.
 
+%The test case is based on the RawInput.csv file which contains the S&P500 stock symbols and their sectors.%
 '''
+#Note that API sometimes is slow and might not work due to a high number of requests. 
 
 #Options for _period : 1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y 10y, ytd, max
 
 # Initialize the stocks and correlations file.
 df, df_corr, sector_indices = initialize_stocks('RawInput.csv','1y')
+
 

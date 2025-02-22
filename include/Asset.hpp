@@ -18,7 +18,7 @@ private:
     Real risk;                                   // Standard deviation of returns [Risk]
     vector<Real> correlations;                   // Correlations with other assets
     inline static int numberOfAssets = 0;        // Number of nodes created
-
+    
 public:
     // Constructor
     Asset(const string& name, 

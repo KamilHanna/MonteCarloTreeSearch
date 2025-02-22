@@ -28,7 +28,6 @@ int main(int argc, char *argv[]) {
     use chrono to compute time
     */
 
-
     // Initialize MPI
     MPI_Init(&argc, &argv);
 

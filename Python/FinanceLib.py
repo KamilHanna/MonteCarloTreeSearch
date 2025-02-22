@@ -45,7 +45,7 @@ def initialize_stocks(filename,_period):
     df_returns = get_expected_returns_and_risk(df,_period)
     
     get_current_price(df)
-
+    get_weights(df)
     # Fill NaN values with 0
     df = df.fillna(0)
     #Save the final DataFrame.
@@ -109,6 +109,28 @@ def get_current_price(df):
         except:
             print(f"Error getting the current price for {symbol}")
             df.loc[index,'Current Price'] = None
+
+# Function to calculate weights based on market caps
+def get_weights(df):
+    market_caps = []  # Temporary list to store market caps
+    
+    # Step 1: Get market caps for all stocks
+    for symbol in df['Symbol']:
+        try:
+            stock = yf.Ticker(symbol)
+            market_cap = stock.info.get("marketCap")  # Get market cap from the 'info' dictionary
+            market_caps.append(market_cap)
+        except Exception as e:
+            print(f"Error getting market cap for {symbol}: {e}")
+            market_caps.append(None)  # Handle missing data
+    
+    # Step 2: Calculate total market cap
+    total_market_cap = sum(market_cap for market_cap in market_caps if market_cap is not None)
+    
+    # Step 3: Calculate weights and store them in the DataFrame
+    df['Weight'] = [market_cap / total_market_cap if market_cap is not None else None for market_cap in market_caps]
+    
+    return df
 
 # Function to get the returns of a stock symbol
 def get_expected_returns_and_risk(df,_period='1y'):

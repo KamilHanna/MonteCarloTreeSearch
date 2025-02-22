@@ -15,18 +15,26 @@
 #include "Node.hpp"
 #include "Asset.hpp"
 #include "Portfolio.hpp"
+#include "Logger.hpp"
+#include "Constraints.hpp"
 
-constexpr int NumberOfAssets = 503; // Number of assets in the portfolio
+struct MCTSParams {
+    bool initialization;
+    int simulations;
+    int horizontal_scaling;
+    bool finetuning;
+    int finetuning_iterations;
+    bool early_stopping;
+    Real early_stopping_return;
+    Real early_stopping_risk;
+};
 
 // Function to retrieve the stock data and correlations from the given files
-vector<Asset> readStockAndCorrelations(const int& AssetCount,
+Portfolio<Real> readPortfolioData(const int& AssetCount,
     const string& stockFilename, const string& correlationsFilename);
  
 //Function to generate N random adjustments for the weights of the assets
 vector<Real> generate_adjustment_values(const int& N);
-
-// Function to print "MCTS" using special symbols
-void print_mcts_banner();
 
 // Function to setup the MCTS
 void MCTS_setup();

@@ -30,16 +30,16 @@ void Portfolio<T>::setWeights(vector<T>&& weights) {
 
 //Member functions
 
-// Computes and returns value of the portfolio
+// Computes and returns value of the Portfolio Weighted Average Price (WAP)
 template <typename T>
-Real Portfolio<T>::computePortfolioValue() const {
-    Real portfolioValue = 0;
+Real Portfolio<T>::computePortfolioWAP() const {
+    Real portfolioWAP = 0;
     for (auto asseti = assets.begin(), weighti = weights.begin(); 
         asseti != assets.end() && weighti != weights.end(); 
         ++asseti, ++weighti) {
-        portfolioValue += asseti->getCurrentPrice() * (*weighti);
+        portfolioWAP += asseti->getCurrentPrice() * (*weighti);
     }
-    return portfolioValue;
+    return portfolioWAP;
 }
 
 // Computes and returns expected return of the portfolio
@@ -54,9 +54,9 @@ Real Portfolio<T>::computeExpectedReturn() const {
     return expectedReturn;
 }
 
-// Computes and returns risk of the portfolio
+// Computes and returns risk of the portfolio (Variance)
 template <typename T> 
-Real Portfolio<T>::computeRisk() const{
+Real Portfolio<T>::computeVarianceRisk() const{
     Real risk = 0;
     for (int i = 0; i < assets.size(); i++) {
         for (int j = 0; j < assets.size(); j++) {
@@ -70,16 +70,31 @@ Real Portfolio<T>::computeRisk() const{
     return risk;
 }
 
-// Computes and returns volatility of the portfolio
+//The real "RISK" basically.
+// Computes and returns volatility of the portfolio (Standard Deviation)
 template <typename T>
-Real Portfolio<T>::computeVolatility() const {
-    return sqrt(computeRisk());
+Real Portfolio<T>::computeVolatilityRisk() const {
+    return sqrt(computeVarianceRisk());
 }
 
 // Computes and returns Sharpe ratio of the portfolio
 template <typename T>
 Real Portfolio<T>::computeSharpeRatio() const{
-    return (computeExpectedReturn() - Constants::RiskFreeRate) / computeVolatility(); 
+    return (computeExpectedReturn() - Constants::RiskFreeRate) / computeVolatilityRisk(); 
+}
+
+template <typename T>
+Real Portfolio<T>::computeAnnualizedReturn() const {
+    // convert daily return from % to decimal
+    Real dailyReturnDecimal = computeExpectedReturn() / 100.0;
+    Real annualizedReturn = std::pow(1 + dailyReturnDecimal, Constants::tradingDays) - 1;
+    // Convert back to percentage (optional, depending on your use case)
+    return annualizedReturn * 100;
+}
+
+template <typename T>
+Real Portfolio<T>::computeAnnualizedVolatility() const {
+    return computeVolatilityRisk() * sqrt(Constants::tradingDays);
 }
 
 template <typename T>
@@ -116,7 +131,7 @@ void Portfolio<T>::printWeights() const {
 template <typename T>
 Real Portfolio<T>::simulatePerformance() const {
     Real expectedReturn = computeExpectedReturn();
-    Real risk = computeRisk();
+    Real risk = computeVolatilityRisk();
     Real sharpeRatio = computeSharpeRatio();
 
     // A weighted combination of Sharpe ratio and risk-return tradeoff
@@ -129,11 +144,12 @@ template <typename T>
 void Portfolio<T>::PortfolioInformation() const {
     cout << "$$Portfolio Information$$" << endl;
     cout << "*************************" << endl;
-    cout << "Expected Return: " << computeExpectedReturn() << endl;
-    cout << "Risk: " << computeRisk() << endl;
-    cout << "Sharpe Ratio: " << computeSharpeRatio() << endl;
-    cout << "Portfolio Value: " << computePortfolioValue() << " $" << endl;
-    cout << "Portfolio Volatility: " << computeVolatility() << endl;
+    cout << "Expected Return (Daily): " << computeExpectedReturn() << " %"<< endl;
+    cout << "Portfolio Risk/Volatility (Daily) : " << computeVolatilityRisk() << " %"<< endl;
+    cout << "Sharpe Ratio (Daily) : " << computeSharpeRatio() << endl;
+    cout << "Portfolio Weighted Average Price: " << computePortfolioWAP() << " $" << endl;
+    cout << "Portfolio Annual Return : " << computeAnnualizedReturn() << " %" << endl;
+    cout << "Portfolio Annual Risk : " << computeAnnualizedVolatility() << " %" << endl;
     cout << "*************************" << endl;
 }
 
@@ -158,6 +174,19 @@ void Portfolio<T>::initializeWeights(){
         for (int i = sector.start_index; i <= sector.end_index; ++i) {
             weights[i] = weights[i] * normfactor;
         }
+    }
+}
+
+// Normalize weights so they sum to 1
+template<typename T>
+void Portfolio<T>::normalizeWeights(){
+    Real totalWeight = 0;
+    for(auto weighti = weights.begin(); weighti != weights.end(); ++weighti) {
+        totalWeight += *weighti;
+    }
+
+    for(auto weighti = weights.begin(); weighti != weights.end(); ++weighti) {
+        *weighti = *weighti / totalWeight;
     }
 }
 
@@ -303,6 +332,20 @@ void Portfolio<T>::Action3(const Real &adjustment_value){
         }
     }
 
+
+        //Normalizing weights so they match Sector total weight constraints
+    for (const auto& sector : Constraints::sectors) {
+        Real sectorWeight = 0;
+        for (int i = sector.start_index; i <= sector.end_index; ++i) {
+            sectorWeight += weights[i];
+        }
+        Real normfactor = sector.max_weight/sectorWeight;
+
+        for (int i = sector.start_index; i <= sector.end_index; ++i) {
+            weights[i] = weights[i] * normfactor;
+        }
+    }
+    
 }
 
 template class Portfolio<Real>;

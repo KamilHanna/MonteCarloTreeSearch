@@ -16,20 +16,33 @@
  * indicating how much uncertainty they are willing to accept in exchange 
  * for potential returns. It influences the trade-off between risk and 
  * return in portfolio optimization.
- *
  * 
+ * 
+ * @constant : {Exploration Constant} :
+ * 
+ * A parameter used in the Upper Confidence Bound 1 (UCB1) algorithm,
+ * which balances the trade-off between exploration and exploitation in
+ * Monte Carlo Tree Search (MCTS). It determines the level of exploration
+ * in the search tree.
  */
 
 // Constants
 namespace Constants {
 
-    constexpr Tiny RiskFreeRate = 0.0443; 
-    // Tune this parameter based on the risk preference
-    constexpr Tiny risk_aversion = 0.4;
+    //Portfolio Class Constants
     
+    constexpr Tiny RiskFreeRate = 0.0443; 
+    // Tune this parameter based on the risk preference (lower value for higher risk aversion)
+    constexpr Tiny risk_aversion = 1.0;
+    constexpr int tradingDays = 252;
+    
+    //MCTS Class Constants
+
     // Tune this parameter based on your preference
     // Exploration constant for UCB1 (MCTS)
     constexpr Tiny explorationConstant = 1.41;  
+    // Tree width for MCTS
+    constexpr int treeWidth = 11;
 
       
 }

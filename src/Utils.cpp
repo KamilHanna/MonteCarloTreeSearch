@@ -1,10 +1,13 @@
 #include "Utils.hpp"
 
 // Function to retrieve the stock data and correlations from the given files
-vector<Asset> readStockAndCorrelations(const int& AssetCount,
+Portfolio<Real> readPortfolioData(const int& AssetCount,
     const string& stockFilename, const string& correlationsFilename) {
+    
     vector<Asset> assets;
     assets.reserve(AssetCount);
+    vector<Real> weights;
+    weights.reserve(AssetCount);
 
     ifstream stockFile(stockFilename);
     ifstream correlationFile(correlationsFilename);
@@ -12,7 +15,7 @@ vector<Asset> readStockAndCorrelations(const int& AssetCount,
     // Check if both files opened successfully
     if (!stockFile.is_open() || !correlationFile.is_open()) {
         std::cerr << "Error: Could not open one or both files" << std::endl;
-        return {};
+        return Portfolio<Real>(vector<Asset>(), vector<Real>());
     }
 
     string line;
@@ -26,8 +29,8 @@ vector<Asset> readStockAndCorrelations(const int& AssetCount,
     while (getline(stockFile, line)) {
         stringstream ss(line);
         string name, assetClass, temp;
-        Real expectedReturn, risk, currentPrice;
-
+        Real expectedReturn, risk, currentPrice, weight;
+    
         // Read stock data
         getline(ss, name, ',');
         getline(ss, assetClass, ',');
@@ -37,6 +40,8 @@ vector<Asset> readStockAndCorrelations(const int& AssetCount,
         risk = stod(temp);
         getline(ss, temp, ',');
         currentPrice = std::stod(temp);
+        getline(ss, temp, ',');
+        weight = stod(temp);
 
         // Read corresponding correlation data from correlation file
         string correlationLine;
@@ -50,13 +55,16 @@ vector<Asset> readStockAndCorrelations(const int& AssetCount,
 
             // Create an Asset object and add it to the list
             assets.emplace_back(name, currentPrice, expectedReturn, risk, assetClass, move(correlations));
+            weights.emplace_back(weight);
         }
     }
 
     stockFile.close();
     correlationFile.close();
 
-    return assets;
+    Portfolio<Real> myPortfolio(move(assets), move(weights));
+
+    return myPortfolio;
 }
 
 //Function to generate N random adjustments for the weights of the assets
@@ -74,67 +82,93 @@ vector<Real> generate_adjustment_values(const int& N) {
         (Constraints::max_adjustment - Constraints::min_adjustment);
         adjustments[i] = random_value;
     }
-    std::sort(adjustments.begin(), adjustments.end());
+    std::sort(adjustments.begin(), adjustments.end(), std::greater<Real>());
     return adjustments;
 }
 
+// Function to setup and initiate the MCTS
+void MCTS_setup() {  
 
-// Function to print "MCTS" using special symbols
-void print_mcts_banner() {
-    std::cout << "#########################################" << std::endl;
-    std::cout << "#  MM     MM   @@@@@@   TTTTT  $$$$$$   #" << std::endl;
-    std::cout << "#  MMM   MMM  @           T    $        #" << std::endl;
-    std::cout << "#  MM M M MM  @           T     $$$$    #" << std::endl;
-    std::cout << "#  MM  M  MM  @           T         $   #" << std::endl;
-    std::cout << "#  MM     MM   @@@@@@     T    $$$$$$   #" << std::endl;
-    std::cout << "#########################################\n" << std::endl;
-}
-
-// Function to setup the MCTS
-void MCTS_setup() {
-
-    void print_mcts_banner();
-    int simulations, horizontalScaling,EarlyStopping;
-    bool finetuning;
-    std::cout << "**Enter the number of simulations: ";
-    std::cin >> simulations;
-
-    std::cout << "Note [Horizontal scaling expands each child node from the 11 sectors," <<
-    "by duplicating them and applying an action on each with different weight adjustment" <<
-    "value.Horizontal Scaling = size of adjutment values vector ] " << std::endl;
-    
-    std::cout << "**Enter the horizontal scaling factor: ";
-    std::cin >> horizontalScaling;
-
-    std::cout << "**Enter the early stopping factor: ";
-    std::cin >> EarlyStopping;
-
-    std::cout << "Note [Fine tuning applies the third Action from the action space,"<<
-    "which adjusts the portfolio overall based on asset correlations instead of sector based adjustments." << std::endl;
-    
-
-    std::cout << "**Enter 1 for finetuning, 0 for no finetuning: ";
-    std::cin >> finetuning;
+    //Input parameters & MCTS setup
+    MCTSParams Params;
+    cout <<" "<< std::endl;
+    cout <<"Weight intialization types : " << std::endl;
+    cout <<"-Equal initialization based on sector constraints-" << std::endl;
+    cout <<"-Marketcap based initialization-" << std::endl;
+    cout <<"Enter 0 for equal initialization, otherwise 1 : ";
+    cin >> Params.initialization;
+    cout <<"Enter the number of simulations : ";
+    cin >> Params.simulations;
+    cout <<"Note [Horizontal scaling expands each child node from the 11 sectors,by duplicating them and applying an action on each with different weight adjustmentvalue.Horizontal Scaling = size of adjutment values vector ] "<< std::endl;
+    cout <<"Enter the horizontal scaling factor : ";
+    cin >> Params.horizontal_scaling;
+    cout <<"Note [Actions 1 and 2 that make return & risk adjustments are set by default.]"<< std::endl;
+    cout <<"Note [Fine tuning applies the third Action from the action space,which adjusts the portfolio overall based on asset correlations instead of sector based adjustments."<< std::endl;
+    cout <<"Enter 1 for Finetuning, 0 otherwise : ";
+    cin >> Params.finetuning;
+    cout <<"Enter the number of finetuning iterations : ";
+    cin >> Params.finetuning_iterations;
+    cout <<"Enter 1 for Early Stopping, 0 otherwise : ";
+    cin >> Params.early_stopping;
+    cout <<"Enter the Early Stopping Return in % : ";
+    cin >> Params.early_stopping_return;
+    cout <<"Enter the Early Stopping Risk in % : ";
+    cin >> Params.early_stopping_risk;
+    cout <<" " << std::endl;
 
     try{
-        vector<Asset> assets = readStockAndCorrelations(NumberOfAssets,
+        Portfolio<Real> myPortfolio = (move(readPortfolioData(Constraints::NumberOfAssets,
         "../Python/Stocks.csv", 
-        "../Python/correlation_matrix.csv");
+        "../Python/correlation_matrix.csv")));
 
-        vector<Real> weights(Asset::getNumberOfAssets());
-
-        Portfolio<Real> myPortfolio(move(assets), move(weights));
-        myPortfolio.initializeWeights();
+        if(Params.initialization == 0){
+            myPortfolio.initializeWeights();
+        }else{
+            myPortfolio.normalizeWeights();
+        }
 
         Node<Portfolio<Real>> myNode(move(myPortfolio));
-    
 
-        myNode.getPortfolio().initializeWeights();
-        cout << myNode.getPortfolio().computeSharpeRatio() << endl;
-        MCTS myMCTS(move(myNode), simulations, horizontalScaling, finetuning, EarlyStopping);
+        MCTS myMCTS(move(myNode), Params.simulations, Params.horizontal_scaling,
+        Params.finetuning, Params.finetuning_iterations);
         
-        myMCTS.MCTSInformation();
-        
+        //Set early stopping conditions
+        if(!Params.early_stopping){
+            myMCTS.setEarlyStopping(false);
+        }else{
+            myMCTS.setEarlyStopping(true);
+            myMCTS.setEarlyStoppingReturn(Params.early_stopping_return);
+            myMCTS.setEarlyStoppingRisk(Params.early_stopping_risk);
+        }
+
+        //Init logger
+        Logger logger(80);
+        logger.setHeader("MCTS");
+
+        // Set MCTS parameters details
+        vector<pair<string, vector<pair<string, VariantType>>>> DataLine = {
+            {"Portfolio parameters", {
+                {"Weights Initialization : ", Params.initialization == 0 ? "Equal" : "Marketcap based"},
+                {"Number of assets : ", Constraints::NumberOfAssets},
+                {"Number of sectors : ", 11}
+            }},
+            {"MCTS parameters ", {
+                {"Number of simulations : ", Params.simulations},
+                {"Horizontal scaling : ", Params.horizontal_scaling},
+                {"Children per simulation : ", Params.horizontal_scaling*Constants::treeWidth},
+                {"Finetuning : ", Params.finetuning},
+                {"Finetuning iterations : ", Params.finetuning_iterations > 0 && Params.finetuning ? to_string(Params.finetuning_iterations) : "None"},
+                {"Early stopping (return) : ", Params.early_stopping_return > 0 ? to_string(Params.early_stopping_return) : "None"},
+                {"Early stopping (risk) : ", Params.early_stopping_risk > 0 ? to_string(Params.early_stopping_risk) : "None"}
+            }},
+            {"MCTS Setup Complete ", {}},
+            {"Starting MCTS.. ", {}}
+        };
+        logger.setDataLine(DataLine);
+
+        // Print display box
+        logger.printDisplayBox();
+
         //Computing Execution time.
         auto start = chrono::high_resolution_clock::now();
         myMCTS.startMCTS();
@@ -142,10 +176,9 @@ void MCTS_setup() {
         auto duration = chrono::duration_cast<chrono::milliseconds>(stop - start);
         cout << "Execution time : " << duration.count() << " milliseconds" << endl;
 
-
     }catch (const std::exception& e) {
         std::cerr << "Exception: " << e.what() << std::endl;
     }
-
 }
+
 

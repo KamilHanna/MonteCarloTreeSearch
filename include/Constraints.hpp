@@ -8,8 +8,12 @@
 // Portfolio Constraints
 namespace Constraints {
 
+    // Number of assets in the portfolio
+    constexpr int NumberOfAssets = 503; 
+    
     // Number of sectors in the S&P 500
     constexpr size_t num_sectors = 11;
+
     struct Sector {
         std::string_view name;
         Real max_weight;
@@ -32,11 +36,32 @@ namespace Constraints {
         {"Materials", 0.0197, 475, 502}
     }};
     
-    constexpr Tiny MinAssetWeight = 0.000001;   // 0.0001% / 10e-6
-    constexpr Tiny MaxAssetWeight = 0.025;    // 2.5% / 2.5e-2
+/*
+ * $The following parameters can be tuned based on the constraints of your application. 
+ *
+ * @constant : MinAssetWeight :
+ * 
+ * The minimum weight of an asset in the portfolio.
+ * 
+ * @constant : MaxAssetWeight :
+ * 
+ * The maximum weight of an asset in the portfolio.
+ * 
+ * @constant : min_adjustment :
+ * 
+ * The minimum adjustment value for the portfolio weights.
+ * 
+ * @constant : max_adjustment :
+ * 
+ * The maximum adjustment value for the portfolio weights.
+ * 
+ * 
+ */
+    constexpr Tiny MinAssetWeight = 0.00000001;   // 0.000001% / 10e-8
+    constexpr Tiny MaxAssetWeight = 0.07;         // 7% / 7e-2
 
-    constexpr Real min_adjustment = 1e-5;
-    constexpr Real max_adjustment = 5e-4;    
+    constexpr Real min_adjustment = 1e-6;         // 0.000001
+    constexpr Real max_adjustment = 1e-3;         // 0.001
 }
 
 #endif // CONSTRAINTS_HPP
