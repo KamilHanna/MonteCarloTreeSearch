@@ -1,11 +1,8 @@
 #include <iostream>
 
-#include "Node.hpp"
-#include "Portfolio.hpp"
 #include "MCTS.hpp"
-#include "Asset.hpp"
 #include "Utils.hpp"
-#include "mpi.h"
+#include "omp.h"
 
 using namespace std;
  
@@ -28,12 +25,10 @@ int main(int argc, char *argv[]) {
     use chrono to compute time
     */
 
-    // Initialize MPI
-    MPI_Init(&argc, &argv);
-
-    MCTS_setup();
+    int num_threads = omp_get_max_threads();
+    std::cout << "Number of threads: " << num_threads << std::endl;
     
-    MPI_Finalize();
+    MCTS_setup();
 
     return 0;
 }

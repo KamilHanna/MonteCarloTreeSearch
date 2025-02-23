@@ -27,6 +27,8 @@ struct MCTSParams {
     bool early_stopping;
     Real early_stopping_return;
     Real early_stopping_risk;
+    int TreeCut;
+    Real TreeCutReductionValue;
 };
 
 // Function to retrieve the stock data and correlations from the given files

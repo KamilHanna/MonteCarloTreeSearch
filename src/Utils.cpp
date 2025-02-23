@@ -88,9 +88,9 @@ vector<Real> generate_adjustment_values(const int& N) {
 
 // Function to setup and initiate the MCTS
 void MCTS_setup() {  
-
-    //Input parameters & MCTS setup
+    //Input MCTS parameters
     MCTSParams Params;
+
     cout <<" "<< std::endl;
     cout <<"Weight intialization types : " << std::endl;
     cout <<"-Equal initialization based on sector constraints-" << std::endl;
@@ -115,18 +115,23 @@ void MCTS_setup() {
     cout <<"Enter the Early Stopping Risk in % : ";
     cin >> Params.early_stopping_risk;
     cout <<" " << std::endl;
+    cout <<"Enter the TreeCut value : ";
+    cin >> Params.TreeCut;
+    cout <<"Enter the TreeCutReductionValue : ";
+    cin >> Params.TreeCutReductionValue;
+    cout <<" " << std::endl;
 
     try{
-        Portfolio<Real> myPortfolio = (move(readPortfolioData(Constraints::NumberOfAssets,
+    Portfolio<Real> myPortfolio = (move(readPortfolioData(Constraints::NumberOfAssets,
         "../Python/Stocks.csv", 
         "../Python/correlation_matrix.csv")));
-
+    
         if(Params.initialization == 0){
             myPortfolio.initializeWeights();
         }else{
             myPortfolio.normalizeWeights();
         }
-
+    
         Node<Portfolio<Real>> myNode(move(myPortfolio));
 
         MCTS myMCTS(move(myNode), Params.simulations, Params.horizontal_scaling,
@@ -141,7 +146,17 @@ void MCTS_setup() {
             myMCTS.setEarlyStoppingRisk(Params.early_stopping_risk);
         }
 
-        //Init logger
+        //Set TreeCut values
+        if(Params.TreeCut > 0){
+            myMCTS.setTreeCut(Params.TreeCut);
+            myMCTS.setTreeCutReductionValue(Params.TreeCutReductionValue);
+        }else{
+            myMCTS.setTreeCut(0);
+            myMCTS.setTreeCutReductionValue(1.0);
+        }
+    
+    // Displaying the problem setup
+        // Init logger
         Logger logger(80);
         logger.setHeader("MCTS");
 
@@ -150,14 +165,14 @@ void MCTS_setup() {
             {"Portfolio parameters", {
                 {"Weights Initialization : ", Params.initialization == 0 ? "Equal" : "Marketcap based"},
                 {"Number of assets : ", Constraints::NumberOfAssets},
-                {"Number of sectors : ", 11}
+                {"Number of sectors : ", Constants::treeWidth},
             }},
             {"MCTS parameters ", {
                 {"Number of simulations : ", Params.simulations},
                 {"Horizontal scaling : ", Params.horizontal_scaling},
-                {"Children per simulation : ", Params.horizontal_scaling*Constants::treeWidth},
-                {"Finetuning : ", Params.finetuning},
-                {"Finetuning iterations : ", Params.finetuning_iterations > 0 && Params.finetuning ? to_string(Params.finetuning_iterations) : "None"},
+                {"Children per simulation : ", Params.horizontal_scaling * Constants::treeWidth},
+                {"Finetuning : ", (Params.finetuning != 0) ? "Yes" : "No"},
+                {"Finetuning iterations : ", Params.finetuning_iterations > 0 && (Params.finetuning != 0) ? to_string(Params.finetuning_iterations) : "None"},
                 {"Early stopping (return) : ", Params.early_stopping_return > 0 ? to_string(Params.early_stopping_return) : "None"},
                 {"Early stopping (risk) : ", Params.early_stopping_risk > 0 ? to_string(Params.early_stopping_risk) : "None"}
             }},
@@ -171,11 +186,13 @@ void MCTS_setup() {
 
         //Computing Execution time.
         auto start = chrono::high_resolution_clock::now();
+
         myMCTS.startMCTS();
+
         auto stop = chrono::high_resolution_clock::now();
         auto duration = chrono::duration_cast<chrono::milliseconds>(stop - start);
         cout << "Execution time : " << duration.count() << " milliseconds" << endl;
-
+        
     }catch (const std::exception& e) {
         std::cerr << "Exception: " << e.what() << std::endl;
     }

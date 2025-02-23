@@ -23,6 +23,8 @@ private:
     bool EarlyStopping;
     Real early_stopping_return;
     Real early_stopping_risk;
+    int TreeCut;
+    Real TreeCutReductionValue;
 
 public:
 
@@ -40,6 +42,8 @@ public:
     bool getEarlyStopping() const;
     Real getEarlyStoppingReturn() const;
     Real getEarlyStoppingRisk() const;
+    int getTreeCut() const;
+    Real getTreeCutReductionValue() const;
     const Node<Portfolio<Real>> &getRoot() const;
 
 
@@ -53,18 +57,20 @@ public:
     void setEarlyStopping(const bool& EarlyStopping);
     void setEarlyStoppingReturn(const Real& early_stopping_return);
     void setEarlyStoppingRisk(const Real& early_stopping_risk);
+    void setTreeCut(const int& TreeCut);
+    void setTreeCutReductionValue(const Real& TreeCutReductionValue);
     void setRoot(Node<Portfolio<Real>>&& root);
 
 
     
     //Member functions
-    void setBestChild(const Real& parentVisits,const int& rank, const int& size);
-    void select(const int& rank, const int& size);
-    void expand(const int& rank, const int& size);     
-    void simulate(const int& rank, const int& size);
-    void backpropagate(const int& rank, const int& size);
-    void expand_finetuning(const int& rank, const int& size);
-    void simulate_finetuning(const int& rank, const int& size);
+    void setBestChild(const Real& parentVisits);
+    void select();
+    void expand();     
+    void simulate(const int& remaining_simulations, const int& total_simulations);
+    void backpropagate();
+    //void expand_finetuning();
+    //void simulate_finetuning();
     void EarlyStoppingMCTS();
     void startMCTS();
 
