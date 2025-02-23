@@ -34,7 +34,10 @@ struct MCTSParams {
 // Function to retrieve the stock data and correlations from the given files
 Portfolio<Real> readPortfolioData(const int& AssetCount,
     const string& stockFilename, const string& correlationsFilename);
- 
+
+// Function to Merge portfolio weights based on sector order. [MCTS Optimization]
+vector<Real> getMergedPortfolioWeights(vector<vector<Real>>& weights);
+
 //Function to generate N random adjustments for the weights of the assets
 vector<Real> generate_adjustment_values(const int& N);
 

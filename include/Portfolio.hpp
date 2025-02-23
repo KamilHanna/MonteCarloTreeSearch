@@ -7,7 +7,7 @@
 #include <vector>
 #include <cmath>
 #include <algorithm> 
-#include <numeric>   
+#include <numeric> 
 
 
 #include "Constants.hpp"
@@ -52,6 +52,7 @@ public :
     void initializeWeights();
     void normalizeWeights();
     void printWeights() const;
+    void printWeightsToFile(const string& filename) const;
     void PortfolioInformation() const;
 
     //Actions

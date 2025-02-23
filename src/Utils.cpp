@@ -67,6 +67,28 @@ Portfolio<Real> readPortfolioData(const int& AssetCount,
     return myPortfolio;
 }
 
+// Function to Merge portfolio weights based on sector order.
+vector<Real> getMergedPortfolioWeights(vector<vector<Real>>& weights){
+    
+    if (weights.empty()) {
+        throw std::invalid_argument("Weights vector is empty.");
+    }
+
+    vector<Real> mergedWeights;
+
+    auto iportfolio = weights.begin(); 
+    int portfolioIndex = 0;
+    // Loop through each sector and take the weights of each sector from a different portfolio (in order)
+    for (const auto& sector : Constraints::sectors) {
+            for (int i = sector.start_index; i <= sector.end_index && iportfolio != weights.end(); ++i) {
+                mergedWeights.emplace_back(iportfolio->at(i));
+
+            }
+            ++iportfolio;
+    }
+    return mergedWeights;
+}
+
 //Function to generate N random adjustments for the weights of the assets
 vector<Real> generate_adjustment_values(const int& N) {
     vector<Real> adjustments(N);
@@ -90,35 +112,47 @@ vector<Real> generate_adjustment_values(const int& N) {
 void MCTS_setup() {  
     //Input MCTS parameters
     MCTSParams Params;
-
+    cout <<" " << std::endl;
+    cout <<"MCTS Portfolio Optimization" << std::endl;
+    cout <<"Suggestion, In Phase I, there is no limit for simulations, the more the better." << std::endl;   
     cout <<" "<< std::endl;
     cout <<"Weight intialization types : " << std::endl;
     cout <<"-Equal initialization based on sector constraints-" << std::endl;
     cout <<"-Marketcap based initialization-" << std::endl;
     cout <<"Enter 0 for equal initialization, otherwise 1 : ";
     cin >> Params.initialization;
+    cout <<" " << std::endl;
+    cout <<" MCTS Phase I : Exploration {Sector Based + Merging Optimization}" << std::endl;
+    cout <<" Action space : 1 & 2 ; return & risk weight gradual adjustments"<< std::endl;
     cout <<"Enter the number of simulations : ";
     cin >> Params.simulations;
     cout <<"Note [Horizontal scaling expands each child node from the 11 sectors,by duplicating them and applying an action on each with different weight adjustmentvalue.Horizontal Scaling = size of adjutment values vector ] "<< std::endl;
     cout <<"Enter the horizontal scaling factor : ";
     cin >> Params.horizontal_scaling;
-    cout <<"Note [Actions 1 and 2 that make return & risk adjustments are set by default.]"<< std::endl;
-    cout <<"Note [Fine tuning applies the third Action from the action space,which adjusts the portfolio overall based on asset correlations instead of sector based adjustments."<< std::endl;
+    cout <<" " << std::endl;
+    cout <<"TreeCut Optimization divides simulations by a Treecut value, which then adjustments are by multiplied by a reductionvalue factor, which decreases as the tree goes deeper." << std::endl;
+    cout <<"Enter the TreeCut value : ";
+    cin >> Params.TreeCut;
+    cout <<"Enter the TreeCutReductionValue (0> & <1) : ";
+    cin >> Params.TreeCutReductionValue;
+
+    cout <<" " << std::endl;
+    cout << "MCTS Phase II : Finetuning {Overall}" << std::endl;
+    cout <<" Action space : 3 ; correlations based weight gradual adjustments."<< std::endl;
     cout <<"Enter 1 for Finetuning, 0 otherwise : ";
     cin >> Params.finetuning;
-    cout <<"Enter the number of finetuning iterations : ";
+    cout <<"Enter the number of finetuning iterations (Suggestion, no more than 3.) : ";
     cin >> Params.finetuning_iterations;
+
+    cout <<" " << std::endl;
+    cout << "Early stopping conditions allow you to set a return and risk threshold for the portfolio." << std::endl;
+    cout << "If the portfolio meets these conditions, the MCTS will stop early." << std::endl;
     cout <<"Enter 1 for Early Stopping, 0 otherwise : ";
     cin >> Params.early_stopping;
     cout <<"Enter the Early Stopping Return in % : ";
     cin >> Params.early_stopping_return;
     cout <<"Enter the Early Stopping Risk in % : ";
     cin >> Params.early_stopping_risk;
-    cout <<" " << std::endl;
-    cout <<"Enter the TreeCut value : ";
-    cin >> Params.TreeCut;
-    cout <<"Enter the TreeCutReductionValue : ";
-    cin >> Params.TreeCutReductionValue;
     cout <<" " << std::endl;
 
     try{
@@ -147,7 +181,7 @@ void MCTS_setup() {
         }
 
         //Set TreeCut values
-        if(Params.TreeCut > 0){
+        if(Params.TreeCut > 0 & Params.TreeCutReductionValue > 0 & Params.TreeCutReductionValue < 1 & Params.TreeCut < Params.simulations){
             myMCTS.setTreeCut(Params.TreeCut);
             myMCTS.setTreeCutReductionValue(Params.TreeCutReductionValue);
         }else{

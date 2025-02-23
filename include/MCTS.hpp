@@ -69,8 +69,10 @@ public:
     void expand();     
     void simulate(const int& remaining_simulations, const int& total_simulations);
     void backpropagate();
-    //void expand_finetuning();
-    //void simulate_finetuning();
+    void setBestChild_finetuning(const Real& parentVisits);
+    void select_finetuning();
+    void expand_finetuning();
+    void simulate_finetuning();
     void EarlyStoppingMCTS();
     void startMCTS();
 

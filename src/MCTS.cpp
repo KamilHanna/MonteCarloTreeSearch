@@ -119,6 +119,76 @@ void MCTS::MCTSInformation() const {
 }
 
 //Member functions
+
+//General Phase (I) - Selection, Expansion, Simulation, Backpropagation (Action space 1 & 2)
+
+void MCTS::setBestChild(const Real& parentVisits) {
+    int num_children = root.getChildren().size();
+
+    vector<Real> bestUCB1 (treeWidth,-std::numeric_limits<Real>::infinity());
+    vector<int> bestChildIndex (treeWidth,-1);
+
+    vector <vector<Real>> portfolioWeights(treeWidth);
+
+    // Finding the best child
+    #pragma omp parallel
+    {
+        // Thread local storage for the UCB1 values and the best child index
+        vector<Real> thread_bestUCB1 (treeWidth, -std::numeric_limits<Real>::infinity());
+        vector<int> thread_bestChildIndex (11,-1);
+
+        #pragma omp for
+        for (int i = 0; i < num_children; i++) {
+            int sector_index = i / HorizontalScaling; // Determine sector for this child
+            Real childUCB1 = root.getChildren()[i]->computeUCB1(parentVisits);
+
+            if (childUCB1 > thread_bestUCB1[sector_index]) {
+                thread_bestUCB1[sector_index] = childUCB1;
+                thread_bestChildIndex[sector_index] = i; // Absolute index
+
+            }
+        }
+
+
+        //Update the best UCB1 and indices for each sector
+        #pragma omp critical
+        {
+            for(int sector = 0; sector < treeWidth; sector++){
+                if (thread_bestUCB1[sector] > bestUCB1[sector]) {
+                    bestUCB1[sector] = thread_bestUCB1[sector];
+                    bestChildIndex[sector] = thread_bestChildIndex[sector];
+                }
+            }
+        }
+    }
+
+    auto overall_best = std::max_element(bestUCB1.begin(), bestUCB1.end());
+    int overall_best_index = std::distance(bestUCB1.begin(), overall_best);
+
+    for (int sector = 0; sector < 11; sector++) {
+       if (bestChildIndex[sector] != -1) {
+           portfolioWeights[sector] = root.getChildren()[bestChildIndex[sector]]->getPortfolio().getWeights();
+           /** DEBUGGING
+           cout << "Weights for sector " << sector << ": ";
+           for (const auto& weight : portfolioWeights[sector]) {
+               cout << weight << " ";
+           }
+           cout << endl;
+           cout << "Sector: " << sector << ", Best Child Index: " << bestChildIndex[sector] << ", UCB1: " << bestUCB1[sector] << endl;
+           */
+       }
+    }
+    
+    if (overall_best_index != -1) {
+        root.getChildren()[overall_best_index]->getPortfolio().setWeights(getMergedPortfolioWeights(portfolioWeights));
+        setRoot(move(*root.getChildren()[overall_best_index]));
+    }
+
+    }
+
+
+
+/*
 void MCTS::setBestChild(const Real& parentVisits) {
     int num_children = root.getChildren().size();
 
@@ -156,6 +226,7 @@ void MCTS::setBestChild(const Real& parentVisits) {
     }
 
 }
+*/
 
 void MCTS::select() {
     //Check if the root has children (if node is terminal)
@@ -196,59 +267,7 @@ void MCTS::expand() {
     root.setChildren(all_children);
 }
 
-/*
-void MCTS::expand_finetuning(const int& rank, const int& size) {
-    int num_children = HorizontalScaling; // Total number of children to create
-    int chunk_size = num_children / size;   // Number of children per process
-    int start_index = rank * chunk_size;
-    int end_index = (rank == size - 1) ? num_children : start_index + chunk_size;
 
-    vector<shared_ptr<Node<Portfolio<Real>>>> local_children;
-    local_children.reserve(chunk_size);
-
-    #pragma omp parallel
-    {
-        #pragma omp for
-        for (int i = start_index; i < end_index; i++) {
-            Portfolio<Real> newPortfolio(root.getPortfolio());
-            Node<Portfolio<Real>> childNode(move(newPortfolio));
-
-            #pragma omp critical
-            {
-                local_children.emplace_back(make_shared<Node<Portfolio<Real>>>(move(childNode)));
-            }
-        }
-    }
-
-    // Gather all children at the root process (rank 0)
-    vector<shared_ptr<Node<Portfolio<Real>>>> all_children;
-    if (rank == 0) {
-        all_children.reserve(num_children);
-    }
-
-    // Gather the number of children from each process
-    int local_size = local_children.size();
-    vector<int> recv_counts(size);
-    MPI_Gather(&local_size, 1, MPI_INT, recv_counts.data(), 1, MPI_INT, 0, MPI_COMM_WORLD);
-
-    // Gather the children
-    if (rank == 0) {
-        all_children.insert(all_children.end(), local_children.begin(), local_children.end());
-        for (int i = 1; i < size; i++) {
-            vector<shared_ptr<Node<Portfolio<Real>>>> temp_children(recv_counts[i]);
-            MPI_Recv(temp_children.data(), recv_counts[i], MPI_UNSIGNED_LONG_LONG, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            all_children.insert(all_children.end(), temp_children.begin(), temp_children.end());
-        }
-    } else {
-        MPI_Send(local_children.data(), local_size, MPI_UNSIGNED_LONG_LONG, 0, 0, MPI_COMM_WORLD);
-    }
-
-    // Set children at the root process
-    if (rank == 0) {
-        root.setChildren(all_children);
-    }
-}
-*/
 void MCTS::simulate(const int& remaining_simulations, const int& total_simulations) {
     int num_children = root.getChildren().size();
     vector<Real> adj_val = generate_adjustment_values(HorizontalScaling);
@@ -273,31 +292,6 @@ void MCTS::simulate(const int& remaining_simulations, const int& total_simulatio
     }
 }
 
-/*
-void MCTS::simulate_finetuning(const int& rank, const int& size) {
-    int num_children = root.getChildren().size();
-    int chunk_size = num_children / size;   // Number of children per process
-    int start_index = rank * chunk_size;
-    int end_index = (rank == size - 1) ? num_children : start_index + chunk_size;
-
-    vector<Real> adj_val = generate_adjustment_values(HorizontalScaling);
-
-    #pragma omp parallel
-    {
-        #pragma omp for
-        for (int i = start_index; i < end_index; i++) {
-            root.getChildren()[i]->getPortfolio().Action3(adj_val[i]);
-
-            Real reward = root.getChildren()[i]->getPortfolio().simulatePerformance();
-            root.getChildren()[i]->setTotalReward(reward);
-        }
-    }
-
-    // Synchronize rewards across processes (if needed)
-    MPI_Barrier(MPI_COMM_WORLD);
-}
-*/
-
 void MCTS::backpropagate() {
     int num_children = root.getChildren().size();
     Real totalReward = 0.0;
@@ -321,6 +315,106 @@ void MCTS::backpropagate() {
 }
 
 
+//Fine tuning Phase. (II) - Selection, Expansion, Simulation, Backpropagation (Action space 3)
+
+//Member functions
+void MCTS::setBestChild_finetuning(const Real& parentVisits) {
+    int num_children = root.getChildren().size();
+
+    Real bestUCB1 = -std::numeric_limits<Real>::infinity();
+    int bestChildIndex = -1;
+
+    // Finding the best child
+    #pragma omp parallel
+    {
+        Real thread_bestUCB1 = -std::numeric_limits<Real>::infinity();
+        int thread_bestChildIndex = -1;
+
+        #pragma omp for
+        for (int i = 0; i < num_children; i++) {
+            Real childUCB1 = root.getChildren()[i]->computeUCB1(parentVisits);
+            if (childUCB1 > thread_bestUCB1) {
+                thread_bestUCB1 = childUCB1;
+                thread_bestChildIndex = i; // Absolute index
+            }
+        }
+
+        //Update the best child
+        #pragma omp critical
+        {
+            if (thread_bestUCB1 > bestUCB1) {
+                bestUCB1 = thread_bestUCB1;
+                bestChildIndex = thread_bestChildIndex;
+            }
+        }
+    }
+
+    // Set the root to the best child
+    if (bestChildIndex != -1) {
+        setRoot(move(*root.getChildren()[bestChildIndex]));
+    }
+
+}
+
+void MCTS::select_finetuning() {
+    //Check if the root has children (if node is terminal)
+    if(!root.getChildren().empty()) {
+        //Select the child with the highest UCB1 value (maximizes the UCB1)
+        Real parentVisits = std::log(root.getVisits()); 
+        setBestChild_finetuning(parentVisits);   
+    }
+    //root.getPortfolio().PortfolioInformation();
+}
+
+void MCTS::expand_finetuning() {
+    int num_children = HorizontalScaling; // Total number of children to create
+
+    vector<shared_ptr<Node<Portfolio<Real>>>> all_children;
+    all_children.reserve(num_children);
+
+    // Create children in parallel
+    #pragma omp parallel
+    {
+        vector<shared_ptr<Node<Portfolio<Real>>>> local_children;
+
+        #pragma omp for
+        for (int i = 0; i < num_children; i++) {
+            Portfolio<Real> newPortfolio(root.getPortfolio());
+            Node<Portfolio<Real>> childNode(move(newPortfolio));
+            local_children.emplace_back(make_shared<Node<Portfolio<Real>>>(move(childNode)));
+        }
+
+        // Use a critical section to merge local_children into all_children
+        #pragma omp critical
+        {
+            all_children.insert(all_children.end(), local_children.begin(), local_children.end());
+        }
+    }
+
+    // Set children at the root
+    root.setChildren(all_children);
+}
+
+void MCTS::simulate_finetuning() {
+    int num_children = root.getChildren().size();
+    vector<Real> adj_val = generate_adjustment_values(HorizontalScaling);
+
+    // Simulate performance for all children in parallel
+    #pragma omp parallel
+    {
+        #pragma omp for
+        for (int i = 0 ; i < num_children; i++) {
+            root.getChildren()[i]->getPortfolio().Action3(adj_val[i]);
+
+            Real reward = root.getChildren()[i]->getPortfolio().simulatePerformance();
+            root.getChildren()[i]->setTotalReward(reward);
+        }
+    }
+
+
+}
+
+// Early stopping condition
 void MCTS::EarlyStoppingMCTS() {
     if(EarlyStopping){
         if (root.getPortfolio().computeAnnualizedReturn() >= early_stopping_return &&
@@ -349,23 +443,22 @@ void MCTS::startMCTS() {
         backpropagate();
     }
 
-    /*
     // Fine tuning Setion
     if (finetuning) {
         cout << "Adjusted S&P 500 Index [Before fine Tuning]" << endl;
         root.getPortfolio().PortfolioInformation();
-        while (FTiterations--) {        
-            select();
+        while (FTiterations--) {     
+            select_finetuning();
             EarlyStoppingMCTS();
             expand_finetuning();
             simulate_finetuning();
             backpropagate();
             }
     }
-    */
 
     cout << "Final adjusted S&P 500 Index" << endl;
     root.getPortfolio().PortfolioInformation();
-    root.getPortfolio().printWeights();
+    root.getPortfolio().printWeightsToFile("../Python/weights.txt");
+    //root.getPortfolio().printWeights();
     
 }

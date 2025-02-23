@@ -9,7 +9,7 @@
 namespace Constraints {
 
     // Number of assets in the portfolio
-    constexpr int NumberOfAssets = 503; 
+    constexpr int NumberOfAssets = 502; 
     
     // Number of sectors in the S&P 500
     constexpr size_t num_sectors = 11;
@@ -33,7 +33,7 @@ namespace Constraints {
         {"Energy", 0.0334, 391, 412},
         {"Utilities", 0.0268, 413, 443},
         {"Real Estate", 0.0226, 444, 474},
-        {"Materials", 0.0197, 475, 502}
+        {"Materials", 0.0197, 475, 501}
     }};
     
 /*

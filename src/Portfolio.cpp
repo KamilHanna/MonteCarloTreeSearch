@@ -129,6 +129,22 @@ void Portfolio<T>::printWeights() const {
 }
 
 template <typename T>
+void Portfolio<T>::printWeightsToFile(const string& filename) const {
+    std::ofstream outFile(filename); // Open a file for writing
+
+    if (!outFile) {
+        std::cerr << "Error opening file for writing!" << std::endl;
+        return;
+    }
+
+    for (auto weighti = weights.begin(); weighti != weights.end(); ++weighti) {
+        outFile << *weighti << std::endl; // Write each weight followed by a newline
+    }
+
+    outFile.close(); // Close the file
+}
+
+template <typename T>
 Real Portfolio<T>::simulatePerformance() const {
     Real expectedReturn = computeExpectedReturn();
     Real risk = computeVolatilityRisk();
@@ -189,7 +205,6 @@ void Portfolio<T>::normalizeWeights(){
         *weighti = *weighti / totalWeight;
     }
 }
-
 
 //Action Space :
 //Action 1: Adjust the asset weights gradually based on returns of the assets.
