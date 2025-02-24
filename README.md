@@ -54,4 +54,53 @@ $ make
 $ ./MCTS_EXEC
 ```
 
+## Runing the Algorithm
+
+The MCTS algorithm for portfolio optimization is divided into two phases: **Phase I (Exploration)** and **Phase II (Finetuning)**. Below are the steps and inputs required to run the algorithm.
+
+### Phase I: Exploration (Sector-Based Weights Adjustments (based on return and risk) + Merging Optimization
+
+1. **Weight Initialization**  
+   - Choose the method for initializing weights:
+     - Enter `0` for **Equal Initialization** (based on sector constraints).
+     - Enter `1` for **Market Cap-Based Initialization**.
+
+2. **Number of Simulations**  
+- Enter the desired number of simulations (the more, the better).  
+
+
+3. **Horizontal Scaling Factor**  
+- Horizontal scaling duplicates child nodes from the 11 sectors, applying weight adjustments with different values.  
+- Enter the size of the adjustment values vector for horizontal scaling.
+
+
+4. **TreeCut Optimization**  
+- Enter a **TreeCut value**, which divides simulations and multiplies adjustments by a reduction factor.  
+- Enter a **TreeCutReductionValue** between 0 and 1, which decreases as the tree goes deeper.
+
+
+### Phase II: Finetuning (Overall weights adjustments based on returns correlation)
+### [Not highly recommended]
+1. **Enable Finetuning**  
+- Enter `1` to enable finetuning, or `0` to skip this phase.
+
+2. **Number of Finetuning Iterations**  
+- Enter the number of iterations for finetuning (recommendation: no more than 3).
+
+### Early Stopping Conditions
+
+You can set thresholds for return and risk. If the portfolio meets these conditions, MCTS will stop early.
+
+1. **Enable Early Stopping**  
+- Enter `1` to enable early stopping, or `0` to disable.
+
+
+2. **Set Early Stopping Thresholds**  
+- Enter the early stopping return threshold in percentage.
+- Enter the early stopping risk threshold in percentage.
+
+
+
+
+
 
