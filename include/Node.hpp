@@ -10,15 +10,6 @@
 
 using namespace std;
 
-/*
-Some notes for the report :
-weak_ptr since parent is not owned by the node..
-shared_ptr since children are owned by the node... ( we don't want tor release...
-(they also handle memory management automatically)
-numberofnodes static (since it is for the class not for the object)
-also getter for parent how it locks weak_ptr
-*/
-
 template <typename state>
 class Node {
 
@@ -55,3 +46,10 @@ public :
 
 #endif //NODE_HPP
 
+
+/*
+Some notes for the report :
+shared_ptr since children are owned by the node... ( we don't want tor release...
+(they also handle memory management automatically)
+numberofnodes static (since it is for the class not for the object)
+*/

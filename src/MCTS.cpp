@@ -168,15 +168,15 @@ void MCTS::setBestChild(const Real& parentVisits) {
     for (int sector = 0; sector < 11; sector++) {
        if (bestChildIndex[sector] != -1) {
            portfolioWeights[sector] = root.getChildren()[bestChildIndex[sector]]->getPortfolio().getWeights();
-           /** DEBUGGING
+           /* DEBUGGING
            cout << "Weights for sector " << sector << ": ";
            for (const auto& weight : portfolioWeights[sector]) {
                cout << weight << " ";
            }
            cout << endl;
            cout << "Sector: " << sector << ", Best Child Index: " << bestChildIndex[sector] << ", UCB1: " << bestUCB1[sector] << endl;
-           */
-       }
+              */
+           }
     }
     
     if (overall_best_index != -1) {
@@ -184,49 +184,7 @@ void MCTS::setBestChild(const Real& parentVisits) {
         setRoot(move(*root.getChildren()[overall_best_index]));
     }
 
-    }
-
-
-
-/*
-void MCTS::setBestChild(const Real& parentVisits) {
-    int num_children = root.getChildren().size();
-
-    Real bestUCB1 = -std::numeric_limits<Real>::infinity();
-    int bestChildIndex = -1;
-
-    // Finding the best child
-    #pragma omp parallel
-    {
-        Real thread_bestUCB1 = -std::numeric_limits<Real>::infinity();
-        int thread_bestChildIndex = -1;
-
-        #pragma omp for
-        for (int i = 0; i < num_children; i++) {
-            Real childUCB1 = root.getChildren()[i]->computeUCB1(parentVisits);
-            if (childUCB1 > thread_bestUCB1) {
-                thread_bestUCB1 = childUCB1;
-                thread_bestChildIndex = i; // Absolute index
-            }
-        }
-
-        //Update the best child
-        #pragma omp critical
-        {
-            if (thread_bestUCB1 > bestUCB1) {
-                bestUCB1 = thread_bestUCB1;
-                bestChildIndex = thread_bestChildIndex;
-            }
-        }
-    }
-
-    // Set the root to the best child
-    if (bestChildIndex != -1) {
-        setRoot(move(*root.getChildren()[bestChildIndex]));
-    }
-
 }
-*/
 
 void MCTS::select() {
     //Check if the root has children (if node is terminal)
